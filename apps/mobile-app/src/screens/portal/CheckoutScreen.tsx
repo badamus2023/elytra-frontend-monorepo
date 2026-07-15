@@ -1,8 +1,10 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { Pressable } from 'react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import styled from 'styled-components/native';
+import { useGetApiDeliveryPoints } from '../../api/generated/delivery-point/delivery-point';
 import { usePostApiOrders } from '../../api/generated/order/order';
 import { useCart } from '../../cart/CartContext';
 import { GradientButton } from '../../components/portal/GradientButton';
@@ -63,17 +65,47 @@ const ErrorText = styled.Text`
   color: ${({ theme }) => theme.colors.errorText};
 `;
 
+const PointOption = styled(Pressable)<{ $selected: boolean }>`
+  margin-bottom: 8px;
+  border-width: 1px;
+  border-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.primary : theme.colors.inputBorder};
+  border-radius: ${({ theme }) => theme.radius.md}px;
+  background-color: ${({ theme, $selected }) =>
+    $selected ? theme.colors.successBg : theme.colors.white};
+  padding: 12px;
+`;
+
+const PointName = styled.Text`
+  font-size: 14px;
+  font-weight: 600;
+  color: ${({ theme }) => theme.colors.text};
+`;
+
+const PointAddress = styled.Text`
+  margin-top: 4px;
+  font-size: 13px;
+  color: ${({ theme }) => theme.colors.textSecondary};
+`;
+
 const CheckoutScreen = () => {
   const route = useRoute<Route>();
   const navigation = useNavigation<Nav>();
   const cart = useCart();
   const createOrder = usePostApiOrders();
+  const { data: deliveryPoints, isLoading: pointsLoading } = useGetApiDeliveryPoints();
   const { restaurantId } = route.params;
 
-  const [deliveryAddress, setDeliveryAddress] = useState('');
-  const [deliveryLatitude, setDeliveryLatitude] = useState('52.2297');
-  const [deliveryLongitude, setDeliveryLongitude] = useState('21.0122');
+  const [deliveryPointId, setDeliveryPointId] = useState('');
+  const [deliveryNotes, setDeliveryNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!deliveryPointId && deliveryPoints?.length) {
+      const first = deliveryPoints.find((point) => point.id);
+      if (first?.id) setDeliveryPointId(first.id);
+    }
+  }, [deliveryPoints, deliveryPointId]);
 
   if (cart.restaurantId !== restaurantId || cart.lines.length === 0) {
     return (
@@ -87,15 +119,9 @@ const CheckoutScreen = () => {
 
   const onPlaceOrder = async () => {
     setError(null);
-    const lat = Number(deliveryLatitude);
-    const lng = Number(deliveryLongitude);
 
-    if (!deliveryAddress.trim()) {
-      setError('Delivery address is required.');
-      return;
-    }
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      setError('Enter valid delivery coordinates.');
+    if (!deliveryPointId) {
+      setError('Select a pickup point for your delivery.');
       return;
     }
 
@@ -103,9 +129,10 @@ const CheckoutScreen = () => {
       await createOrder.mutateAsync({
         data: {
           restaurantId,
-          deliveryAddress: deliveryAddress.trim(),
-          deliveryLatitude: lat,
-          deliveryLongitude: lng,
+          deliveryPointId,
+          ...(deliveryNotes.trim()
+            ? { deliveryAddress: deliveryNotes.trim() }
+            : {}),
           items: cart.lines.map((line) => ({
             productId: line.productId,
             quantity: line.quantity,
@@ -140,32 +167,42 @@ const CheckoutScreen = () => {
       </PortalCard>
 
       <PortalCard title="Delivery details">
-        <FieldLabel>Delivery address</FieldLabel>
+        <FieldLabel>Pickup point</FieldLabel>
+        {pointsLoading ? (
+          <MutedText>Loading pickup points…</MutedText>
+        ) : (deliveryPoints ?? []).length === 0 ? (
+          <MutedText>No pickup points are available yet.</MutedText>
+        ) : (
+          (deliveryPoints ?? []).map((point) => {
+            if (!point.id) return null;
+            const selected = deliveryPointId === point.id;
+            return (
+              <PointOption
+                key={point.id}
+                $selected={selected}
+                onPress={() => setDeliveryPointId(point.id!)}
+              >
+                <PointName>{point.name}</PointName>
+                <PointAddress>{point.address}</PointAddress>
+              </PointOption>
+            );
+          })
+        )}
+        <FieldLabel>Delivery notes (optional)</FieldLabel>
         <FieldInput
-          value={deliveryAddress}
-          onChangeText={setDeliveryAddress}
-          placeholder="Street, building, notes for the drone"
+          value={deliveryNotes}
+          onChangeText={setDeliveryNotes}
+          placeholder="Gate code, landmark, etc."
         />
-        <FieldLabel>Latitude</FieldLabel>
-        <FieldInput
-          value={deliveryLatitude}
-          onChangeText={setDeliveryLatitude}
-          keyboardType="decimal-pad"
-        />
-        <FieldLabel>Longitude</FieldLabel>
-        <FieldInput
-          value={deliveryLongitude}
-          onChangeText={setDeliveryLongitude}
-          keyboardType="decimal-pad"
-        />
-        <MutedText>
-          Set coordinates for your delivery landing zone. Native location picker can be added
-          later.
-        </MutedText>
         {error ? <ErrorText>{error}</ErrorText> : null}
         <GradientButton
           title="Place order"
           loading={createOrder.isPending}
+          disabled={
+            pointsLoading ||
+            (deliveryPoints ?? []).length === 0 ||
+            !deliveryPointId
+          }
           onPress={onPlaceOrder}
         />
       </PortalCard>

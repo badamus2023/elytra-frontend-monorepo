@@ -12,6 +12,7 @@ import {
   Boxes,
   LayoutDashboard,
   Map,
+  MapPin,
   MessageSquare,
   Plane,
   Truck,
@@ -22,10 +23,11 @@ import { WorkspaceAuthProvider } from '@drones/shared/auth/WorkspaceAuthContext'
 import { getAccessToken } from '@drones/shared/auth/session'
 import {
   AppShell,
-  type AppNotification,
 } from '@drones/shared/layouts/AppShell'
+import { useOperationalNotifications } from '@drones/shared/notifications/useOperationalNotifications'
 import { AnalyticsDashboardPage } from '../pages/AnalyticsDashboardPage'
 import { CustomersManagementPage } from '../pages/CustomersManagementPage'
+import { DeliveryPointsPage } from '../pages/DeliveryPointsPage'
 import { DronesManagementPage } from '../pages/DronesManagementPage'
 import { FleetOverviewPage } from '../pages/FleetOverviewPage'
 import { MissionsManagementPage } from '../pages/MissionsManagementPage'
@@ -56,11 +58,9 @@ function guardAdmin() {
   }
 }
 
-function buildOperationalNotifications(): AppNotification[] {
-  return []
-}
-
 function AdminLayout() {
+  const { notifications } = useOperationalNotifications('admin')
+
   return (
     <WorkspaceAuthProvider auth={workspaceAuth}>
       <AppShell
@@ -68,7 +68,7 @@ function AdminLayout() {
         brandSubtitle="Drone Fleet Platform"
         workspaceLabel="Management"
         accent="violet"
-        notifications={buildOperationalNotifications()}
+        notifications={notifications}
         sections={[
           {
             heading: 'Overview',
@@ -132,6 +132,11 @@ function AdminLayout() {
                 to: '/restaurants',
                 label: 'Restaurant catalog',
                 icon: <Utensils size={16} />,
+              },
+              {
+                to: '/delivery-points',
+                label: 'Pickup points',
+                icon: <MapPin size={16} />,
               },
               {
                 to: '/reviews',
@@ -242,6 +247,12 @@ const restaurantsRoute = createRoute({
   component: RestaurantManagementPage,
 })
 
+const deliveryPointsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/delivery-points',
+  component: DeliveryPointsPage,
+})
+
 const reviewsRoute = createRoute({
   getParentRoute: () => appRoute,
   path: '/reviews',
@@ -291,6 +302,7 @@ const routeTree = rootRoute.addChildren([
     packagesRoute,
     customersRoute,
     restaurantsRoute,
+    deliveryPointsRoute,
     reviewsRoute,
     opsDashboardRoute,
     opsFlightsRoute,

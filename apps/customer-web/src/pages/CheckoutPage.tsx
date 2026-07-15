@@ -1,10 +1,12 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link, useSearch } from '@tanstack/react-router'
 import { CreditCard, Loader2 } from 'lucide-react'
 import {
   useCreateCheckoutSession,
   useCreateOrder,
 } from '@drones/shared/integrations/orval/mutations'
+import { useDeliveryPoints } from '@drones/shared/integrations/orval/queries'
+import { formatCoords } from '@drones/shared/api/format'
 import { useCart } from '../cart/CartContext'
 import { PortalCard } from './ui/PortalCard'
 
@@ -16,12 +18,19 @@ export function CheckoutPage() {
   const cart = useCart()
   const createOrder = useCreateOrder()
   const createCheckout = useCreateCheckoutSession()
+  const { data: deliveryPoints, isLoading: pointsLoading } = useDeliveryPoints()
 
   const restaurantId = search.restaurantId ?? cart.restaurantId ?? ''
-  const [deliveryAddress, setDeliveryAddress] = useState('')
-  const [deliveryLatitude, setDeliveryLatitude] = useState('52.2297')
-  const [deliveryLongitude, setDeliveryLongitude] = useState('21.0122')
+  const [deliveryPointId, setDeliveryPointId] = useState('')
+  const [deliveryNotes, setDeliveryNotes] = useState('')
   const [error, setError] = useState('')
+
+  useEffect(() => {
+    if (!deliveryPointId && deliveryPoints?.length) {
+      const first = deliveryPoints.find((p) => p.id)
+      if (first?.id) setDeliveryPointId(first.id)
+    }
+  }, [deliveryPoints, deliveryPointId])
 
   if (!restaurantId || cart.lines.length === 0) {
     return (
@@ -42,24 +51,18 @@ export function CheckoutPage() {
     event.preventDefault()
     setError('')
 
-    const lat = Number(deliveryLatitude)
-    const lng = Number(deliveryLongitude)
-
-    if (!deliveryAddress.trim()) {
-      setError('Delivery address is required.')
-      return
-    }
-    if (!Number.isFinite(lat) || !Number.isFinite(lng)) {
-      setError('Enter valid delivery coordinates.')
+    if (!deliveryPointId) {
+      setError('Select a pickup point for your delivery.')
       return
     }
 
     try {
       const order = await createOrder.mutateAsync({
         restaurantId,
-        deliveryAddress: deliveryAddress.trim(),
-        deliveryLatitude: lat,
-        deliveryLongitude: lng,
+        deliveryPointId,
+        ...(deliveryNotes.trim()
+          ? { deliveryAddress: deliveryNotes.trim() }
+          : {}),
         items: cart.lines.map((line) => ({
           productId: line.productId,
           quantity: line.quantity,
@@ -120,33 +123,62 @@ export function CheckoutPage() {
 
       <PortalCard title="Delivery details">
         <form onSubmit={onSubmit} className="space-y-4">
+          {pointsLoading ? (
+            <p className="text-sm text-slate-500">Loading pickup points…</p>
+          ) : (deliveryPoints ?? []).length === 0 ? (
+            <p className="rounded-md border border-amber-200 bg-amber-50 p-3 text-sm text-amber-900">
+              No pickup points are available yet. Please try again later.
+            </p>
+          ) : (
+            <fieldset className="space-y-2">
+              <legend className="text-sm font-medium text-slate-700">
+                Pickup point
+              </legend>
+              {(deliveryPoints ?? []).map((point) => {
+                if (!point.id) return null
+                const selected = deliveryPointId === point.id
+                return (
+                  <label
+                    key={point.id}
+                    className={`flex cursor-pointer gap-3 rounded-lg border p-3 text-sm transition ${
+                      selected
+                        ? 'border-sky-400 bg-sky-50 ring-1 ring-sky-200'
+                        : 'border-slate-200 bg-white hover:border-slate-300'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="deliveryPoint"
+                      value={point.id}
+                      checked={selected}
+                      onChange={() => setDeliveryPointId(point.id!)}
+                      className="mt-1"
+                    />
+                    <span>
+                      <span className="block font-medium text-slate-900">
+                        {point.name}
+                      </span>
+                      <span className="block text-slate-600">{point.address}</span>
+                      <span className="mt-1 block font-mono text-xs text-slate-500">
+                        {formatCoords(point.latitude, point.longitude)}
+                      </span>
+                    </span>
+                  </label>
+                )
+              })}
+            </fieldset>
+          )}
           <label className="block text-sm">
-            <span className="font-medium text-slate-700">Delivery address</span>
+            <span className="font-medium text-slate-700">
+              Delivery notes (optional)
+            </span>
             <input
-              value={deliveryAddress}
-              onChange={(event) => setDeliveryAddress(event.target.value)}
-              placeholder="Street, building, notes for the drone"
+              value={deliveryNotes}
+              onChange={(event) => setDeliveryNotes(event.target.value)}
+              placeholder="Gate code, landmark, etc."
               className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
             />
           </label>
-          <div className="grid gap-4 sm:grid-cols-2">
-            <label className="block text-sm">
-              <span className="font-medium text-slate-700">Latitude</span>
-              <input
-                value={deliveryLatitude}
-                onChange={(event) => setDeliveryLatitude(event.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-              />
-            </label>
-            <label className="block text-sm">
-              <span className="font-medium text-slate-700">Longitude</span>
-              <input
-                value={deliveryLongitude}
-                onChange={(event) => setDeliveryLongitude(event.target.value)}
-                className="mt-1 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm shadow-sm focus:border-sky-500 focus:outline-none focus:ring-2 focus:ring-sky-200"
-              />
-            </label>
-          </div>
           <p className="text-xs text-slate-500">
             After placing the order you will be redirected to Stripe test checkout to
             pay securely.
@@ -158,7 +190,12 @@ export function CheckoutPage() {
           ) : null}
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={
+              isSubmitting ||
+              pointsLoading ||
+              (deliveryPoints ?? []).length === 0 ||
+              !deliveryPointId
+            }
             className="inline-flex w-full items-center justify-center gap-2 rounded-lg bg-gradient-to-r from-sky-500 to-indigo-600 px-4 py-2.5 text-sm font-semibold text-white shadow-sm hover:from-sky-600 hover:to-indigo-700 disabled:opacity-60"
           >
             {isSubmitting ? (

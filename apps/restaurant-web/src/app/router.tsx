@@ -16,6 +16,7 @@ import {
 import { WorkspaceAuthProvider } from '@drones/shared/auth/WorkspaceAuthContext'
 import { getAccessToken } from '@drones/shared/auth/session'
 import { AppShell } from '@drones/shared/layouts/AppShell'
+import { useOperationalNotifications } from '@drones/shared/notifications/useOperationalNotifications'
 import { MenuManagementPage } from '../pages/MenuManagementPage'
 import { OwnerDashboardPage } from '../pages/OwnerDashboardPage'
 import { OwnerOrdersPage } from '../pages/OwnerOrdersPage'
@@ -39,6 +40,8 @@ function guardOwner() {
 }
 
 function OwnerLayout() {
+  const { notifications } = useOperationalNotifications('restaurant')
+
   return (
     <WorkspaceAuthProvider auth={workspaceAuth}>
       <AppShell
@@ -46,7 +49,7 @@ function OwnerLayout() {
         brandSubtitle="Partner portal"
         workspaceLabel="Owner"
         accent="amber"
-        notifications={[]}
+        notifications={notifications}
         sections={[
           {
             heading: 'Workspace',

@@ -1,4 +1,5 @@
 import { getAccessToken } from '../auth/session'
+import { getApiErrorMessage } from '@drones/shared/api/parseApiError'
 
 export function withAuth(init?: RequestInit): RequestInit {
   const token = getAccessToken()
@@ -28,12 +29,7 @@ export function assertOk(
   fallbackMessage: string,
 ): void {
   if (status >= 200 && status < 300) return
-  let message = fallbackMessage
-  if (typeof data === 'object' && data !== null) {
-    const rec = data as Record<string, unknown>
-    if (typeof rec.message === 'string') message = rec.message
-    else if (typeof rec.Message === 'string') message = rec.Message
-    else if (typeof rec.title === 'string') message = rec.title
-  }
-  throw new Error(message)
+  throw new Error(getApiErrorMessage(data, fallbackMessage))
 }
+
+export { getApiErrorMessage } from '@drones/shared/api/parseApiError'

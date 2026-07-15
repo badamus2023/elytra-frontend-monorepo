@@ -1,9 +1,10 @@
-import { useMemo, useState, type ReactNode } from 'react'
+import { useMemo, useRef, useState, type ReactNode } from 'react'
 import {
   Link,
   Outlet,
   useRouterState,
 } from '@tanstack/react-router'
+import { useNotificationReadState } from '../notifications/useNotificationReadState'
 import {
   Bell,
   ChevronRight,
@@ -14,6 +15,7 @@ import {
   X,
 } from 'lucide-react'
 import { useWorkspaceAuth } from '../auth/WorkspaceAuthContext'
+import { useDismissOnClickOutside } from '../hooks/useDismissOnClickOutside'
 
 export type NavLink = {
   to: string
@@ -100,6 +102,10 @@ export function AppShell({
   const role = getRole()
   const userName = getUserName()
   const colors = accentMap[accent]
+  const { unreadCount, markAllAsRead } = useNotificationReadState(notifications)
+  const notifyRef = useRef<HTMLDivElement>(null)
+
+  useDismissOnClickOutside(notifyRef, notifyOpen, () => setNotifyOpen(false))
 
   const routerState = useRouterState()
   const pathname = routerState.location.pathname
@@ -172,20 +178,26 @@ export function AppShell({
               />
             </div>
 
-            <div className="relative">
+            <div className="relative" ref={notifyRef}>
               <button
                 type="button"
                 onClick={() => {
-                  setNotifyOpen((value) => !value)
+                  setNotifyOpen((value) => {
+                    const opening = !value
+                    if (opening) {
+                      markAllAsRead()
+                    }
+                    return opening
+                  })
                   setUserOpen(false)
                 }}
                 className="relative rounded-md border border-white/10 p-2 text-zinc-200 hover:bg-white/10"
                 aria-label="Notifications"
               >
                 <Bell size={16} />
-                {notifications.length > 0 ? (
+                {unreadCount > 0 ? (
                   <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-red-500 px-1 text-[10px] font-bold text-white">
-                    {notifications.length}
+                    {unreadCount}
                   </span>
                 ) : null}
               </button>
@@ -197,7 +209,11 @@ export function AppShell({
                       Notifications
                     </p>
                     <p className="text-xs text-zinc-400">
-                      {notifications.length} active alerts
+                      {unreadCount > 0
+                        ? `${unreadCount} unread`
+                        : notifications.length > 0
+                          ? `${notifications.length} recent alert${notifications.length === 1 ? '' : 's'}`
+                          : 'No active alerts'}
                     </p>
                   </div>
                   <ul className="max-h-72 divide-y divide-white/5 overflow-y-auto">
@@ -274,7 +290,7 @@ export function AppShell({
                     onClick={handleLogout}
                     className="flex w-full items-center gap-2 px-4 py-2 text-sm text-red-200 hover:bg-red-500/10"
                   >
-                    <LogOut size={14} /> Switch role
+                    <LogOut size={14} /> Logout
                   </button>
                 </div>
               ) : null}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, Outlet, useRouterState } from '@tanstack/react-router'
 import {
   Bell,
@@ -12,6 +12,9 @@ import {
   X,
 } from 'lucide-react'
 import { useWorkspaceAuth } from '../auth/WorkspaceAuthContext'
+import { useNotificationReadState } from '../notifications/useNotificationReadState'
+import { useDismissOnClickOutside } from '../hooks/useDismissOnClickOutside'
+import type { AppNotification } from './AppShell'
 
 type CustomerNavItem = {
   to: string
@@ -20,28 +23,40 @@ type CustomerNavItem = {
 
 type CustomerShellProps = {
   navItems: CustomerNavItem[]
-  notificationsCount: number
+  notifications: AppNotification[]
   isAuthenticated: boolean
+}
+
+const severityDot: Record<AppNotification['severity'], string> = {
+  info: 'bg-sky-500',
+  warning: 'bg-amber-500',
+  critical: 'bg-rose-500',
 }
 
 export function CustomerShell({
   navItems,
-  notificationsCount,
+  notifications,
   isAuthenticated,
 }: CustomerShellProps) {
   const { getUserName, clearRole } = useWorkspaceAuth()
   const [mobileOpen, setMobileOpen] = useState(false)
   const [accountOpen, setAccountOpen] = useState(false)
+  const [notifyOpen, setNotifyOpen] = useState(false)
   const userName = getUserName()
   const routerState = useRouterState()
   const pathname = routerState.location.pathname
   const authNext = pathname.startsWith('/') ? pathname : '/'
+  const { unreadCount, markAllAsRead } = useNotificationReadState(notifications)
+  const notifyRef = useRef<HTMLDivElement>(null)
+
+  useDismissOnClickOutside(notifyRef, notifyOpen, () => setNotifyOpen(false))
 
   const [trackedPath, setTrackedPath] = useState(pathname)
   if (trackedPath !== pathname) {
     setTrackedPath(pathname)
     setMobileOpen(false)
     setAccountOpen(false)
+    setNotifyOpen(false)
   }
 
   const handleLogout = () => {
@@ -94,24 +109,81 @@ export function CustomerShell({
 
           <div className="ml-auto flex items-center gap-2">
             {isAuthenticated ? (
-              <button
-                type="button"
-                className="relative rounded-md border border-slate-200 p-2 text-slate-600 hover:bg-slate-100"
-                aria-label="Notifications"
-              >
-                <Bell size={16} />
-                {notificationsCount > 0 ? (
-                  <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
-                    {notificationsCount}
-                  </span>
+              <div className="relative" ref={notifyRef}>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setNotifyOpen((value) => {
+                      const opening = !value
+                      if (opening) {
+                        markAllAsRead()
+                      }
+                      return opening
+                    })
+                    setAccountOpen(false)
+                  }}
+                  className="relative rounded-md border border-slate-200 p-2 text-slate-600 hover:bg-slate-100"
+                  aria-label="Notifications"
+                >
+                  <Bell size={16} />
+                  {unreadCount > 0 ? (
+                    <span className="absolute -right-1 -top-1 min-w-[18px] rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white">
+                      {unreadCount}
+                    </span>
+                  ) : null}
+                </button>
+
+                {notifyOpen ? (
+                  <div className="absolute right-0 z-30 mt-2 w-80 overflow-hidden rounded-lg border border-slate-200 bg-white shadow-lg">
+                    <div className="border-b border-slate-100 px-4 py-2">
+                      <p className="text-sm font-semibold text-slate-900">
+                        Notifications
+                      </p>
+                      <p className="text-xs text-slate-500">
+                        {unreadCount > 0
+                          ? `${unreadCount} unread`
+                          : notifications.length > 0
+                            ? `${notifications.length} recent update${notifications.length === 1 ? '' : 's'}`
+                            : 'No updates right now'}
+                      </p>
+                    </div>
+                    <ul className="max-h-72 divide-y divide-slate-100 overflow-y-auto">
+                      {notifications.length === 0 ? (
+                        <li className="px-4 py-6 text-center text-xs text-slate-500">
+                          No updates right now
+                        </li>
+                      ) : (
+                        notifications.map((notification) => (
+                          <li key={notification.id} className="px-4 py-3">
+                            <div className="flex items-start gap-2">
+                              <span
+                                className={`mt-1.5 h-2 w-2 shrink-0 rounded-full ${severityDot[notification.severity]}`}
+                              />
+                              <div>
+                                <p className="text-sm font-medium text-slate-900">
+                                  {notification.title}
+                                </p>
+                                <p className="text-xs text-slate-500">
+                                  {notification.description}
+                                </p>
+                              </div>
+                            </div>
+                          </li>
+                        ))
+                      )}
+                    </ul>
+                  </div>
                 ) : null}
-              </button>
+              </div>
             ) : null}
 
             <div className="relative">
               <button
                 type="button"
-                onClick={() => setAccountOpen((value) => !value)}
+                onClick={() => {
+                  setAccountOpen((value) => !value)
+                  setNotifyOpen(false)
+                }}
                 className="flex items-center gap-2 rounded-md border border-slate-200 px-2 py-1.5 hover:bg-slate-100"
               >
                 <span className="flex h-7 w-7 items-center justify-center rounded-full bg-gradient-to-br from-sky-500 to-indigo-600 text-xs font-bold text-white">

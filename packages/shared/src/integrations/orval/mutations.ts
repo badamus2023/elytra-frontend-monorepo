@@ -1,6 +1,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import type {
   CreateCategoryRequest,
+  CreateDeliveryPointRequest,
   CreateDispatchRequest,
   CreateDroneRequest,
   CreateOrderRequest,
@@ -10,6 +11,7 @@ import type {
   RegisterRequest,
   RestaurantResponse,
   UpdateCategoryRequest,
+  UpdateDeliveryPointRequest,
   UpdateDroneRequest,
   UpdateProductRequest,
   UpdateRestaurantRequest,
@@ -17,11 +19,13 @@ import type {
 } from '../../api/model'
 import {
   deleteApiCategoriesId,
+  deleteApiDeliveryPointsId,
   deleteApiDronesDroneId,
   deleteApiProductsId,
   deleteApiRestaurantsId,
   deleteApiReviewsReviewId,
   patchApiCategoriesId,
+  patchApiDeliveryPointsId,
   patchApiDispatchesDispatchIdStatus,
   patchApiDronesDroneId,
   patchApiProductsId,
@@ -33,20 +37,19 @@ import {
   postApiAuthResetPassword,
   postApiAuthVerifyEmail,
   postApiCategories,
+  postApiDeliveryPoints,
   postApiDispatches,
   postApiDispatchesDispatchIdSimulate,
   postApiDrones,
   postApiOrders,
   postApiOrdersOrderIdCancel,
+  postApiPaymentsConfirm,
+  postApiPaymentsOrderOrderIdCheckout,
   postApiProducts,
   postApiRestaurants,
   postApiReviews,
 } from '../../api/client'
 import { assertOk, withAuth } from '../../api/withAuth'
-import {
-  postApiPaymentsConfirm,
-  postApiPaymentsOrderOrderIdCheckout,
-} from '../../api/payments'
 
 function useInvalidate(keys: string[]) {
   const queryClient = useQueryClient()
@@ -105,7 +108,8 @@ export function useCreateOrder() {
 export function useCreateCheckoutSession() {
   return useMutation({
     mutationFn: async (orderId: string) => {
-      const r = await postApiPaymentsOrderOrderIdCheckout(orderId)
+      const r = await postApiPaymentsOrderOrderIdCheckout(orderId, withAuth())
+      assertOk(r.status, r.data, 'Failed to start payment')
       return r.data
     },
   })
@@ -115,7 +119,8 @@ export function useConfirmPayment() {
   const invalidate = useInvalidate(['orders'])
   return useMutation({
     mutationFn: async (sessionId: string) => {
-      const r = await postApiPaymentsConfirm(sessionId)
+      const r = await postApiPaymentsConfirm({ sessionId }, withAuth())
+      assertOk(r.status, r.data, 'Failed to confirm payment')
       return r.data
     },
     onSuccess: invalidate,
@@ -363,6 +368,42 @@ export function useSimulateDispatch() {
     mutationFn: async (dispatchId: string) => {
       const r = await postApiDispatchesDispatchIdSimulate(dispatchId, withAuth())
       assertOk(r.status, r.data, 'Failed to start simulation')
+    },
+    onSuccess: invalidate,
+  })
+}
+
+export function useCreateDeliveryPoint() {
+  const invalidate = useInvalidate(['delivery-points'])
+  return useMutation({
+    mutationFn: async (payload: CreateDeliveryPointRequest) => {
+      const r = await postApiDeliveryPoints(payload, withAuth())
+      assertOk(r.status, r.data, 'Failed to create pickup point')
+      return r.data
+    },
+    onSuccess: invalidate,
+  })
+}
+
+export function useUpdateDeliveryPoint() {
+  const invalidate = useInvalidate(['delivery-points'])
+  return useMutation({
+    mutationFn: async (args: { id: string; body: UpdateDeliveryPointRequest }) => {
+      const r = await patchApiDeliveryPointsId(args.id, args.body, withAuth())
+      assertOk(r.status, r.data, 'Failed to update pickup point')
+      return r.data
+    },
+    onSuccess: invalidate,
+  })
+}
+
+export function useDeactivateDeliveryPoint() {
+  const invalidate = useInvalidate(['delivery-points'])
+  return useMutation({
+    mutationFn: async (id: string) => {
+      const r = await deleteApiDeliveryPointsId(id, withAuth())
+      assertOk(r.status, r.data, 'Failed to deactivate pickup point')
+      return r.data
     },
     onSuccess: invalidate,
   })

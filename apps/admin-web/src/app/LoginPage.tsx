@@ -2,6 +2,7 @@ import { useState, type FormEvent } from 'react'
 import { Link, useSearch } from '@tanstack/react-router'
 import type { AuthResponse } from '@drones/shared/api/model'
 import { postApiAuthLogin } from '@drones/shared/api/client'
+import { getApiErrorMessage } from '@drones/shared/api/parseApiError'
 import { setSession } from '@drones/shared/auth/session'
 import { rolesAllowedForWorkspace } from '@drones/shared/auth/workspace'
 import { setRole, setUserName } from '../auth/workspace'
@@ -23,11 +24,7 @@ export function LoginPage() {
         { method: 'POST', headers: { 'Content-Type': 'application/json' } },
       )
       if (r.status < 200 || r.status >= 300) {
-        const msg =
-          typeof r.data === 'object' && r.data && 'message' in r.data
-            ? String((r.data as { message: unknown }).message)
-            : 'Login failed'
-        throw new Error(msg)
+        throw new Error(getApiErrorMessage(r.data, 'Login failed'))
       }
       const auth: AuthResponse = r.data
       if (!auth?.accessToken || !auth?.user) {

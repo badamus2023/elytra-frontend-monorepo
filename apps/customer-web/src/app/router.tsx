@@ -9,6 +9,7 @@ import {
 import { WorkspaceAuthProvider } from '@drones/shared/auth/WorkspaceAuthContext'
 import { getAccessToken } from '@drones/shared/auth/session'
 import { CustomerShell } from '@drones/shared/layouts/CustomerShell'
+import { useOperationalNotifications } from '@drones/shared/notifications/useOperationalNotifications'
 import { CartProvider } from '../cart/CartContext'
 import { CustomerDashboardPage } from '../pages/CustomerDashboardPage'
 import { CheckoutPage } from '../pages/CheckoutPage'
@@ -58,13 +59,16 @@ function guardCustomer() {
 
 function CustomerLayout() {
   const isAuthenticated = isCustomerAuthenticated()
+  const { notifications } = useOperationalNotifications('customer', {
+    enabled: isAuthenticated,
+  })
 
   return (
     <WorkspaceAuthProvider auth={workspaceAuth}>
       <CartProvider>
         <CustomerShell
           isAuthenticated={isAuthenticated}
-          notificationsCount={isAuthenticated ? 2 : 0}
+          notifications={notifications}
           navItems={isAuthenticated ? fullNav : publicNav}
         />
       </CartProvider>

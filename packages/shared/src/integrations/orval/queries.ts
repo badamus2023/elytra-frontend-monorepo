@@ -2,6 +2,7 @@ import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import type {
   CategoryResponse,
+  DeliveryPointResponse,
   DispatchResponse,
   DroneResponse,
   OrderResponse,
@@ -12,6 +13,8 @@ import type {
 import {
   getApiCategories,
   getApiCategoriesRestaurantRestaurantId,
+  getApiDeliveryPoints,
+  getApiDeliveryPointsAll,
   getApiDispatchesDispatchId,
   getApiDispatchesOrderOrderId,
   getApiDrones,
@@ -33,7 +36,12 @@ function normalizeOrder(
   return Array.isArray(data) ? data[0] : data;
 }
 
-export function useDrones() {
+type QueryPollOptions = {
+  refetchInterval?: number;
+  enabled?: boolean;
+};
+
+export function useDrones(options?: QueryPollOptions) {
   return useQuery({
     queryKey: ["drones"],
     queryFn: async (): Promise<DroneResponse[]> => {
@@ -41,6 +49,8 @@ export function useDrones() {
       assertOk(r.status, r.data, "Failed to load drones");
       return r.data;
     },
+    refetchInterval: options?.refetchInterval,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -67,7 +77,7 @@ export function useAvailableDrones() {
   });
 }
 
-export function useOrders() {
+export function useOrders(options?: QueryPollOptions) {
   return useQuery({
     queryKey: ["orders"],
     queryFn: async (): Promise<OrderResponse[]> => {
@@ -75,6 +85,8 @@ export function useOrders() {
       assertOk(r.status, r.data, "Failed to load orders");
       return r.data;
     },
+    refetchInterval: options?.refetchInterval,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -116,7 +128,7 @@ export function useDispatch(dispatchId: string) {
   });
 }
 
-export function useRestaurants() {
+export function useRestaurants(options?: QueryPollOptions) {
   return useQuery({
     queryKey: ["restaurants"],
     queryFn: async (): Promise<RestaurantResponse[]> => {
@@ -124,6 +136,8 @@ export function useRestaurants() {
       assertOk(r.status, r.data, "Failed to load restaurants");
       return r.data;
     },
+    refetchInterval: options?.refetchInterval,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -217,4 +231,26 @@ export function useRestaurantNameMap() {
     }
     return map;
   }, [data]);
+}
+
+export function useDeliveryPoints() {
+  return useQuery({
+    queryKey: ["delivery-points"],
+    queryFn: async (): Promise<DeliveryPointResponse[]> => {
+      const r = await getApiDeliveryPoints();
+      assertOk(r.status, r.data, "Failed to load pickup points");
+      return r.data;
+    },
+  });
+}
+
+export function useAllDeliveryPoints() {
+  return useQuery({
+    queryKey: ["delivery-points", "all"],
+    queryFn: async (): Promise<DeliveryPointResponse[]> => {
+      const r = await getApiDeliveryPointsAll(withAuth());
+      assertOk(r.status, r.data, "Failed to load pickup points");
+      return r.data;
+    },
+  });
 }
