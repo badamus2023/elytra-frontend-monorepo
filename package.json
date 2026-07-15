@@ -1,0 +1,21 @@
+{
+  "name": "drones-frontend",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "packageManager": "yarn@4.9.2",
+  "scripts": {
+    "dev:customer": "yarn workspace customer-web dev",
+    "dev:restaurant": "yarn workspace restaurant-web dev",
+    "dev:admin": "yarn workspace admin-web dev",
+    "dev": "yarn workspaces foreach -Apt --exclude mobile-app run dev",
+    "start:mobile": "yarn workspace mobile-app start",
+    "android:mobile": "yarn workspace mobile-app android",
+    "ios:mobile": "yarn workspace mobile-app ios:dev",
+    "build": "yarn workspaces foreach -Apt --exclude mobile-app run build",
+    "orval": "yarn workspace @drones/shared orval",
+    "lint": "yarn workspaces foreach -Apt run lint"
+  }
+}
