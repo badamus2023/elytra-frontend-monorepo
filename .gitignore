@@ -8,3 +8,6 @@ dist/
 !.yarn/versions
 *.log
 .DS_Store
+.env
+.env.*
+!.env.example

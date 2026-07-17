@@ -23,8 +23,13 @@ class DroneHubService {
       this.connection = null;
     }
 
+    const hubUrl = import.meta.env.VITE_DRONE_HUB_URL;
+    if (!hubUrl) {
+      throw new Error("VITE_DRONE_HUB_URL is not configured");
+    }
+
     this.connection = new signalR.HubConnectionBuilder()
-      .withUrl("http://localhost:8080/hubs/drone")
+      .withUrl(hubUrl)
       .withAutomaticReconnect()
       .build();
 

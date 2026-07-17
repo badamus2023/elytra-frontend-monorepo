@@ -1,8 +1,20 @@
 import { defineConfig } from 'orval';
 
+declare const process: {
+  loadEnvFile(path?: string): void;
+  env: Record<string, string | undefined>;
+};
+
+process.loadEnvFile();
+
+const apiUrl = process.env.API_URL?.replace(/\/$/, '');
+if (!apiUrl) {
+  throw new Error('API_URL is not configured in .env');
+}
+
 export default defineConfig({
   api: {
-    input: 'http://localhost:8080/swagger/v1/swagger.json',
+    input: `${apiUrl}/swagger/v1/swagger.json`,
     output: {
       mode: 'tags-split',
       target: './src/api/generated',

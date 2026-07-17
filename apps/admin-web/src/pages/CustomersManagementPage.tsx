@@ -1,5 +1,5 @@
 export function CustomersManagementPage() {
-  const customerAppUrl = 'http://localhost:5173'
+  const customerAppUrl = import.meta.env.VITE_CUSTOMER_APP_URL
 
   return (
     <section className="rounded-xl border border-white/10 bg-zinc-900/70 p-4">
