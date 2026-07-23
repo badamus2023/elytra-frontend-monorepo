@@ -18,6 +18,7 @@ import {
   Truck,
   Users,
   Utensils,
+  ClipboardCheck,
 } from 'lucide-react'
 import { WorkspaceAuthProvider } from '@drones/shared/auth/WorkspaceAuthContext'
 import { getAccessToken } from '@drones/shared/auth/session'
@@ -34,6 +35,7 @@ import { MissionsManagementPage } from '../pages/MissionsManagementPage'
 import { PackagesManagementPage } from '../pages/PackagesManagementPage'
 import { ReviewsManagementPage } from '../pages/ReviewsManagementPage'
 import RestaurantManagementPage from '../pages/RestaurantManagmentPage'
+import { RestaurantApplicationsPage } from '../pages/RestaurantApplicationsPage'
 import { DroneDetailsPage } from '../pages/operator/DroneDetailsPage'
 import { DronesListPage } from '../pages/operator/DronesListPage'
 import { FlightsBoardPage } from '../pages/operator/FlightsBoardPage'
@@ -132,6 +134,11 @@ function AdminLayout() {
                 to: '/restaurants',
                 label: 'Restaurant catalog',
                 icon: <Utensils size={16} />,
+              },
+              {
+                to: '/restaurant-applications',
+                label: 'Partner applications',
+                icon: <ClipboardCheck size={16} />,
               },
               {
                 to: '/delivery-points',
@@ -246,6 +253,11 @@ const restaurantsRoute = createRoute({
   path: '/restaurants',
   component: RestaurantManagementPage,
 })
+const restaurantApplicationsRoute = createRoute({
+  getParentRoute: () => appRoute,
+  path: '/restaurant-applications',
+  component: RestaurantApplicationsPage,
+})
 
 const deliveryPointsRoute = createRoute({
   getParentRoute: () => appRoute,
@@ -302,6 +314,7 @@ const routeTree = rootRoute.addChildren([
     packagesRoute,
     customersRoute,
     restaurantsRoute,
+    restaurantApplicationsRoute,
     deliveryPointsRoute,
     reviewsRoute,
     opsDashboardRoute,

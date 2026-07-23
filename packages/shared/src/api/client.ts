@@ -30,6 +30,9 @@ import type {
   ProductResponse,
   RefreshTokenRequest,
   RegisterRequest,
+  RegisterRestaurantOwnerRequest,
+  RestaurantApplicationResponse,
+  DroneFlightHistoryResponse,
   ResetPasswordRequest,
   RestaurantResponse,
   ReviewResponse,
@@ -42,6 +45,60 @@ import type {
   UpdateReviewRequest,
   VerifyEmailRequest
 } from './model';
+
+export async function postApiAuthRegisterRestaurantOwner(
+  body: RegisterRestaurantOwnerRequest,
+  options?: RequestInit,
+) {
+  const res = await fetch('/api/auth/register-restaurant-owner', {
+    ...options, method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(body),
+  })
+  const text = await res.text()
+  return { data: text ? JSON.parse(text) : {}, status: res.status, headers: res.headers }
+}
+
+export async function getApiRestaurantApplications(options?: RequestInit) {
+  const res = await fetch('/api/restaurant-applications', options)
+  const text = await res.text()
+  return { data: (text ? JSON.parse(text) : []) as RestaurantApplicationResponse[], status: res.status, headers: res.headers }
+}
+
+export async function getApiRestaurantApplicationsMine(options?: RequestInit) {
+  const res = await fetch('/api/restaurant-applications/mine', options)
+  const text = await res.text()
+  return { data: (text ? JSON.parse(text) : {}) as RestaurantApplicationResponse, status: res.status, headers: res.headers }
+}
+
+export async function postApiRestaurantApplicationsReview(
+  id: string, action: 'approve' | 'reject', adminNote: string, options?: RequestInit,
+) {
+  const res = await fetch(`/api/restaurant-applications/${id}/${action}`, {
+    ...options, method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify({ adminNote }),
+  })
+  const text = await res.text()
+  return { data: text ? JSON.parse(text) : {}, status: res.status, headers: res.headers }
+}
+
+export async function getApiRestaurantsMine(options?: RequestInit) {
+  const res = await fetch('/api/restaurants/mine', options)
+  const text = await res.text()
+  return { data: text ? JSON.parse(text) : {}, status: res.status, headers: res.headers }
+}
+
+export async function getApiDispatchesDroneHistory(
+  droneId: string, from?: string, to?: string, options?: RequestInit,
+) {
+  const params = new URLSearchParams()
+  if (from) params.set('from', from)
+  if (to) params.set('to', to)
+  const res = await fetch(`/api/dispatches/drone/${droneId}/history?${params}`, options)
+  const text = await res.text()
+  return { data: (text ? JSON.parse(text) : []) as DroneFlightHistoryResponse[], status: res.status, headers: res.headers }
+}
 
 export type postApiAuthRegisterResponse200 = {
   data: AuthResponse
@@ -1623,6 +1680,25 @@ export const postApiOrdersOrderIdCancel = async (orderId: string, options?: Requ
   
   const data: postApiOrdersOrderIdCancelResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as postApiOrdersOrderIdCancelResponse
+}
+
+export type postApiOrdersOrderIdConfirmReceiptResponse = {
+  data: OrderResponse
+  status: 200
+  headers: Headers
+}
+
+export const postApiOrdersOrderIdConfirmReceipt = async (
+  orderId: string,
+  options?: RequestInit,
+): Promise<postApiOrdersOrderIdConfirmReceiptResponse> => {
+  const res = await fetch(`/api/orders/${orderId}/confirm-receipt`, {
+    ...options,
+    method: 'POST',
+  })
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
+  const data = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiOrdersOrderIdConfirmReceiptResponse
 }
 
 

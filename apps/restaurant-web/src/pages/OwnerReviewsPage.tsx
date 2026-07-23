@@ -1,4 +1,4 @@
-import { useRestaurants, useReviewsByRestaurant } from '@drones/shared/integrations/orval/queries'
+import { useMyRestaurant as useRestaurants, useReviewsByRestaurant } from '@drones/shared/integrations/orval/queries'
 
 export function OwnerReviewsPage() {
   const { data: restaurants } = useRestaurants()

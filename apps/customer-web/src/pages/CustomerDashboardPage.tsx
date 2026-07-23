@@ -12,7 +12,7 @@ function orderInAir(status: string | null | undefined) {
 }
 
 function orderDelivered(status: string | null | undefined) {
-  return status?.toLowerCase() === 'delivered'
+  return ['delivered', 'completed'].includes(status?.toLowerCase() ?? '')
 }
 
 export function CustomerDashboardPage() {

@@ -12234,6 +12234,7 @@ __metadata:
     "@babel/core": "npm:^7.25.2"
     "@babel/preset-env": "npm:^7.25.3"
     "@babel/runtime": "npm:^7.25.0"
+    "@microsoft/signalr": "npm:^10.0.0"
     "@react-native-async-storage/async-storage": "npm:^3.0.2"
     "@react-native-community/cli": "npm:20.1.0"
     "@react-native-community/cli-platform-android": "npm:20.1.0"

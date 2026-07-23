@@ -17,12 +17,14 @@ import { WorkspaceAuthProvider } from '@drones/shared/auth/WorkspaceAuthContext'
 import { getAccessToken } from '@drones/shared/auth/session'
 import { AppShell } from '@drones/shared/layouts/AppShell'
 import { useOperationalNotifications } from '@drones/shared/notifications/useOperationalNotifications'
+import { useMyRestaurantApplication } from '@drones/shared/integrations/orval/queries'
 import { MenuManagementPage } from '../pages/MenuManagementPage'
 import { OwnerDashboardPage } from '../pages/OwnerDashboardPage'
 import { OwnerOrdersPage } from '../pages/OwnerOrdersPage'
 import { OwnerRestaurantPage } from '../pages/OwnerRestaurantPage'
 import { OwnerReviewsPage } from '../pages/OwnerReviewsPage'
 import { LoginPage } from './LoginPage'
+import { RegisterPage } from './RegisterPage'
 import { getRole, workspaceAuth } from '../auth/workspace'
 
 function guardOwner() {
@@ -41,6 +43,17 @@ function guardOwner() {
 
 function OwnerLayout() {
   const { notifications } = useOperationalNotifications('restaurant')
+  const application = useMyRestaurantApplication()
+  if (application.isLoading) return <div className="min-h-screen bg-zinc-950 p-10 text-zinc-400">Loading application…</div>
+  if (application.data?.status !== 'Approved') return (
+    <main className="flex min-h-screen items-center justify-center bg-zinc-950 p-4 text-zinc-100">
+      <section className="max-w-lg rounded-2xl border border-white/10 bg-zinc-900 p-8">
+        <p className="text-xs uppercase tracking-widest text-amber-400">Application {application.data?.status ?? 'unknown'}</p>
+        <h1 className="mt-2 text-2xl font-semibold">Restaurant approval required</h1>
+        <p className="mt-3 text-zinc-400">{application.data?.status === 'Rejected' ? application.data.adminNote ?? 'Your application was rejected. Contact support.' : 'An administrator is reviewing your company details. You will receive a real-time notification after the decision.'}</p>
+      </section>
+    </main>
+  )
 
   return (
     <WorkspaceAuthProvider auth={workspaceAuth}>
@@ -109,6 +122,12 @@ const loginRoute = createRoute({
   component: LoginPage,
 })
 
+const registerRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/register',
+  component: RegisterPage,
+})
+
 const appRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'owner-app',
@@ -149,6 +168,7 @@ const reviewsRoute = createRoute({
 const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
+  registerRoute,
   appRoute.addChildren([
     dashboardRoute,
     ordersRoute,

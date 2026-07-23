@@ -36,7 +36,7 @@ export function AnalyticsDashboardPage() {
   const products = productsQuery.data ?? []
 
   const completedOrders = orders.filter(
-    (o) => o.status?.toLowerCase() === 'delivered',
+    (o) => ['delivered', 'completed'].includes(o.status?.toLowerCase() ?? ''),
   ).length
   const inFlight = orders.filter((o) =>
     ['inflight', 'dispatched'].includes(o.status?.toLowerCase() ?? ''),

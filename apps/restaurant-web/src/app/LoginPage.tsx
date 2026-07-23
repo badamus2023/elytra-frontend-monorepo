@@ -1,5 +1,5 @@
 import { useState, type FormEvent } from 'react'
-import { useSearch } from '@tanstack/react-router'
+import { Link, useSearch } from '@tanstack/react-router'
 import type { AuthResponse } from '@drones/shared/api/model'
 import { postApiAuthLogin } from '@drones/shared/api/client'
 import { getApiErrorMessage } from '@drones/shared/api/parseApiError'
@@ -89,6 +89,12 @@ export function LoginPage() {
             Continue
           </button>
         </form>
+        <p className="mt-5 text-center text-sm text-zinc-400">
+          New restaurant?{' '}
+          <Link to="/register" className="text-amber-400 hover:underline">
+            Submit an application
+          </Link>
+        </p>
       </section>
     </div>
   )

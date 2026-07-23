@@ -10,6 +10,7 @@ import { WorkspaceAuthProvider } from '@drones/shared/auth/WorkspaceAuthContext'
 import { getAccessToken } from '@drones/shared/auth/session'
 import { CustomerShell } from '@drones/shared/layouts/CustomerShell'
 import { useOperationalNotifications } from '@drones/shared/notifications/useOperationalNotifications'
+import { CustomerReceiptGate } from '@drones/shared/notifications/CustomerReceiptGate'
 import { CartProvider } from '../cart/CartContext'
 import { CustomerDashboardPage } from '../pages/CustomerDashboardPage'
 import { CheckoutPage } from '../pages/CheckoutPage'
@@ -66,6 +67,7 @@ function CustomerLayout() {
   return (
     <WorkspaceAuthProvider auth={workspaceAuth}>
       <CartProvider>
+        {isAuthenticated ? <CustomerReceiptGate /> : null}
         <CustomerShell
           isAuthenticated={isAuthenticated}
           notifications={notifications}

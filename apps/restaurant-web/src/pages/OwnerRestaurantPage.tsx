@@ -1,7 +1,7 @@
 import { useMemo, useState, type FormEvent } from 'react'
 import { formatCoords, fromApiTimeSpan, toApiTimeSpan } from '@drones/shared/api/format'
 import { useUpdateRestaurant } from '@drones/shared/integrations/orval/mutations'
-import { useRestaurants } from '@drones/shared/integrations/orval/queries'
+import { useMyRestaurant as useRestaurants } from '@drones/shared/integrations/orval/queries'
 
 export function OwnerRestaurantPage() {
   const { data: restaurants, isLoading } = useRestaurants()

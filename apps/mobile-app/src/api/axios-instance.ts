@@ -1,6 +1,6 @@
 import axios from 'axios';
 import type { AxiosRequestConfig, InternalAxiosRequestConfig } from 'axios';
-import type { AuthResponse } from '../domain';
+import type { AuthResponse } from './domain';
 import { getApiBaseUrl } from '../config/env';
 import {
   getRefreshToken,

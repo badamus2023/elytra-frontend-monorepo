@@ -320,4 +320,51 @@ const {mutation: mutationOptions} = options ?
 
       return useMutation(mutationOptions, queryClient);
     }
-    
+
+export const postApiOrdersOrderIdConfirmReceipt = (
+  orderId: string,
+  signal?: AbortSignal,
+) =>
+  customInstance<OrderResponse>({
+    url: `/api/orders/${orderId}/confirm-receipt`,
+    method: 'POST',
+    signal,
+  });
+
+export const getPostApiOrdersOrderIdConfirmReceiptMutationOptions = <
+  TError = unknown,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof postApiOrdersOrderIdConfirmReceipt>>,
+    TError,
+    { orderId: string },
+    TContext
+  >;
+}) => {
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof postApiOrdersOrderIdConfirmReceipt>>,
+    { orderId: string }
+  > = ({ orderId }) => postApiOrdersOrderIdConfirmReceipt(orderId);
+
+  return { mutationFn, ...options?.mutation };
+};
+
+export const usePostApiOrdersOrderIdConfirmReceipt = <
+  TError = unknown,
+  TContext = unknown,
+>(
+  options?: {
+    mutation?: UseMutationOptions<
+      Awaited<ReturnType<typeof postApiOrdersOrderIdConfirmReceipt>>,
+      TError,
+      { orderId: string },
+      TContext
+    >;
+  },
+  queryClient?: QueryClient,
+) =>
+  useMutation(
+    getPostApiOrdersOrderIdConfirmReceiptMutationOptions(options),
+    queryClient,
+  );

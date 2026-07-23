@@ -43,6 +43,7 @@ import {
   postApiDrones,
   postApiOrders,
   postApiOrdersOrderIdCancel,
+  postApiOrdersOrderIdConfirmReceipt,
   postApiPaymentsConfirm,
   postApiPaymentsOrderOrderIdCheckout,
   postApiProducts,
@@ -50,7 +51,6 @@ import {
   postApiReviews,
 } from '../../api/client'
 import { assertOk, withAuth } from '../../api/withAuth'
-
 function useInvalidate(keys: string[]) {
   const queryClient = useQueryClient()
   return () => {
@@ -133,6 +133,18 @@ export function useCancelOrder() {
     mutationFn: async (orderId: string) => {
       const r = await postApiOrdersOrderIdCancel(orderId, withAuth())
       assertOk(r.status, r.data, 'Failed to cancel order')
+    },
+    onSuccess: invalidate,
+  })
+}
+
+export function useConfirmReceipt() {
+  const invalidate = useInvalidate(['orders'])
+  return useMutation({
+    mutationFn: async (orderId: string) => {
+      const r = await postApiOrdersOrderIdConfirmReceipt(orderId, withAuth())
+      assertOk(r.status, r.data, 'Failed to confirm receipt')
+      return r.data
     },
     onSuccess: invalidate,
   })

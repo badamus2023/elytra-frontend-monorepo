@@ -27,6 +27,10 @@ import {
   getApiRestaurants,
   getApiRestaurantsId,
   getApiReviewsRestaurantRestaurantId,
+  getApiRestaurantsMine,
+  getApiRestaurantApplications,
+  getApiRestaurantApplicationsMine,
+  getApiDispatchesDroneHistory,
 } from "../../api/client";
 import { assertOk, withAuth } from "../../api/withAuth";
 
@@ -139,6 +143,55 @@ export function useRestaurants(options?: QueryPollOptions) {
     refetchInterval: options?.refetchInterval,
     enabled: options?.enabled ?? true,
   });
+}
+
+export function useMyRestaurant() {
+  return useQuery({
+    queryKey: ['restaurant', 'mine'],
+    queryFn: async (): Promise<RestaurantResponse[]> => {
+      const r = await getApiRestaurantsMine(withAuth())
+      assertOk(r.status, r.data, 'Failed to load your restaurant')
+      return [r.data as RestaurantResponse]
+    },
+  })
+}
+
+export function useRestaurantApplications() {
+  return useQuery({
+    queryKey: ['restaurant-applications'],
+    queryFn: async () => {
+      const r = await getApiRestaurantApplications(withAuth())
+      assertOk(r.status, r.data, 'Failed to load applications')
+      return r.data
+    },
+  })
+}
+
+export function useMyRestaurantApplication() {
+  return useQuery({
+    queryKey: ['restaurant-application', 'mine'],
+    queryFn: async () => {
+      const r = await getApiRestaurantApplicationsMine(withAuth())
+      assertOk(r.status, r.data, 'Failed to load application')
+      return r.data
+    },
+  })
+}
+
+export function useDroneFlightHistory(
+  droneId: string,
+  from?: string,
+  to?: string,
+) {
+  return useQuery({
+    queryKey: ['drone-flight-history', droneId, from, to],
+    queryFn: async () => {
+      const r = await getApiDispatchesDroneHistory(droneId, from, to, withAuth())
+      assertOk(r.status, r.data, 'Failed to load flight history')
+      return r.data
+    },
+    enabled: Boolean(droneId),
+  })
 }
 
 export function useRestaurant(restaurantId: string) {

@@ -1,4 +1,4 @@
-import { useOrders, useRestaurants } from '@drones/shared/integrations/orval/queries'
+import { useOrders, useMyRestaurant as useRestaurants } from '@drones/shared/integrations/orval/queries'
 import { StatusBadge } from '@drones/shared/ui/StatusBadge'
 import { shortId } from '@drones/shared/api/format'
 

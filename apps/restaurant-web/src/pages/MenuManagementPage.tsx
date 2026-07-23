@@ -11,7 +11,7 @@ import {
 import {
   useCategoriesByRestaurant,
   useProductsByRestaurant,
-  useRestaurants,
+  useMyRestaurant as useRestaurants,
 } from '@drones/shared/integrations/orval/queries'
 import { ConfirmDialog } from '@drones/shared/components/ConfirmDialog/ConfirmDialog'
 import { FormModal } from '@drones/shared/components/FormModal/FormModal'

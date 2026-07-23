@@ -8,19 +8,37 @@ import { AuthProvider } from './src/auth/AuthContext';
 import { CartProvider } from './src/cart/CartContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { theme } from './src/theme';
+import { ToastProvider } from './src/notifications/ToastProvider';
+import { RealtimeNotifications } from './src/notifications/RealtimeNotifications';
+import { CustomerReceiptGate } from './src/notifications/CustomerReceiptGate';
+import { useAuth } from './src/auth/AuthContext';
 
 enableScreens(true);
+
+function AuthenticatedNotificationLayer() {
+  const { isLoggedIn } = useAuth();
+  if (!isLoggedIn) return null;
+  return (
+    <>
+      <RealtimeNotifications />
+      <CustomerReceiptGate />
+    </>
+  );
+}
 
 function App(): React.JSX.Element {
   return (
     <SafeAreaProvider>
       <ThemeProvider theme={theme}>
         <QueryClientProvider client={queryClient}>
-          <AuthProvider>
-            <CartProvider>
-              <RootNavigator />
-            </CartProvider>
-          </AuthProvider>
+          <ToastProvider>
+            <AuthProvider>
+              <CartProvider>
+                <RootNavigator />
+                <AuthenticatedNotificationLayer />
+              </CartProvider>
+            </AuthProvider>
+          </ToastProvider>
         </QueryClientProvider>
       </ThemeProvider>
     </SafeAreaProvider>

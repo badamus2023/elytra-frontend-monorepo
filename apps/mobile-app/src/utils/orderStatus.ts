@@ -4,7 +4,7 @@ export function orderInAir(status: string | undefined): boolean {
 }
 
 export function orderDelivered(status: string | undefined): boolean {
-  return status?.toLowerCase() === 'delivered';
+  return ['delivered', 'completed'].includes(status?.toLowerCase() ?? '');
 }
 
 export type OrderFilter = 'all' | 'active' | 'done';
@@ -18,14 +18,14 @@ export function matchesOrderFilter(
     return ['pending', 'paid', 'dispatched', 'inflight'].includes(s);
   }
   if (filter === 'done') {
-    return s === 'delivered' || s === 'cancelled';
+    return s === 'delivered' || s === 'completed' || s === 'cancelled';
   }
   return true;
 }
 
 export function getTrackStageIndex(status: string): number {
   const normalized = status.toLowerCase();
-  if (normalized === 'delivered') {
+  if (normalized === 'delivered' || normalized === 'completed') {
     return 2;
   }
   if (

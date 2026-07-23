@@ -1,4 +1,4 @@
-import { useOrders, useRestaurants } from '@drones/shared/integrations/orval/queries'
+import { useOrders, useMyRestaurant as useRestaurants } from '@drones/shared/integrations/orval/queries'
 import { KpiCard } from '@drones/shared/ui/KpiCard'
 
 export function OwnerDashboardPage() {

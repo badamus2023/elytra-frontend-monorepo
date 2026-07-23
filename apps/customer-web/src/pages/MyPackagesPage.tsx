@@ -34,7 +34,7 @@ export function MyPackagesPage() {
         if (filter === 'active')
           return ['pending', 'paid', 'dispatched', 'inflight'].includes(s)
         if (filter === 'done')
-          return s === 'delivered' || s === 'cancelled'
+          return s === 'delivered' || s === 'completed' || s === 'cancelled'
         return true
       })
       .filter((order) => {

@@ -140,7 +140,8 @@ const TrackDeliveryScreen = () => {
   const canModify =
     order &&
     orderStatus !== 'cancelled' &&
-    orderStatus !== 'delivered';
+    orderStatus !== 'delivered' &&
+    orderStatus !== 'completed';
 
   return (
     <PortalScreen keyboardShouldPersistTaps="handled">

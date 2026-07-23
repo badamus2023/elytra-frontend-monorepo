@@ -70,7 +70,7 @@ export function TrackDeliveryPage() {
     { key: 'delivered', label: 'Delivered' },
   ]
   const activeIndex = (() => {
-    if (status === 'delivered') return 3
+    if (status === 'delivered' || status === 'completed') return 3
     if (
       status.includes('flight') ||
       status.includes('dispatch') ||
@@ -216,7 +216,7 @@ export function TrackDeliveryPage() {
               </div>
               {dispatch &&
               order.status?.toLowerCase() !== 'cancelled' &&
-              order.status?.toLowerCase() !== 'delivered' ? (
+              !['delivered', 'completed'].includes(order.status?.toLowerCase() ?? '') ? (
                 <button
                   type="button"
                   disabled={simulateDispatch.isPending}
@@ -261,7 +261,7 @@ export function TrackDeliveryPage() {
             </PortalCard>
 
             {order.status?.toLowerCase() !== 'cancelled' &&
-            order.status?.toLowerCase() !== 'delivered' ? (
+            !['delivered', 'completed'].includes(order.status?.toLowerCase() ?? '') ? (
               <button
                 type="button"
                 disabled={cancelOrder.isPending}
