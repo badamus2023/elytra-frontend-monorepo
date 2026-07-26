@@ -17,16 +17,17 @@ import {
 } from '../../components/portal';
 import type { OrderResponse, DispatchResponse } from '../../api/model';
 import {
-  getGetApiOrdersOrderIdQueryKey,
   useGetApiOrdersOrderId,
 } from '../../api/generated/order/order';
 import {
-  getGetApiDispatchesOrderOrderIdQueryKey,
   useGetApiDispatchesOrderOrderId,
 } from '../../api/generated/dispatch/dispatch';
 import { usePostApiOrdersOrderIdCancel } from '../../api/generated/order/order';
 import { usePostApiDispatchesDispatchIdSimulate } from '../../api/generated/dispatch/dispatch';
-import { queryClient } from '../../api/queryClient';
+import {
+  markOrderCancelledInCache,
+  refreshOrderCache,
+} from '../../api/orderCache';
 import { useOrderTrackingMap } from '../../hooks/useOrderTrackingMap';
 import type { PortalTabParamList } from '../../navigation/types';
 import {
@@ -101,6 +102,15 @@ const CompactAction = styled.View`
   align-items: flex-end;
 `;
 
+const DisabledActionHint = styled.Text`
+  margin-top: ${({ theme }) => theme.spacing.sm}px;
+  align-self: flex-start;
+  font-size: 12px;
+  line-height: 17px;
+  text-align: left;
+  color: ${({ theme }) => theme.colors.textMuted};
+`;
+
 const TrackDeliveryScreen = () => {
   const route = useRoute<TrackRoute>();
   const [query, setQuery] = useState(route.params?.orderId ?? '');
@@ -132,22 +142,16 @@ const TrackDeliveryScreen = () => {
   const activeIndex = useMemo(() => getTrackStageIndex(status), [status]);
 
   const refetchAll = async () => {
-    await Promise.all([
-      queryClient.invalidateQueries({
-        queryKey: getGetApiOrdersOrderIdQueryKey(activeId),
-      }),
-      queryClient.invalidateQueries({
-        queryKey: getGetApiDispatchesOrderOrderIdQueryKey(activeId),
-      }),
-    ]);
+    await refreshOrderCache(activeId);
   };
 
   const orderStatus = order?.status?.toLowerCase() ?? '';
-  const canModify =
+  const canModifyDispatch =
     order &&
     orderStatus !== 'cancelled' &&
     orderStatus !== 'delivered' &&
     orderStatus !== 'completed';
+  const canCancel = Boolean(order && orderStatus === 'pending');
 
   return (
     <PortalScreen keyboardShouldPersistTaps="handled">
@@ -239,7 +243,7 @@ const TrackDeliveryScreen = () => {
                 ? `Last update ${dispatch.updatedAt ?? dispatch.createdAt}`
                 : 'A drone will be assigned when your delivery starts.'}
             </MutedText>
-            {dispatch && dispatchId && canModify ? (
+            {dispatch && dispatchId && canModifyDispatch ? (
               <SpacedTop>
                 <GradientButton
                   title={
@@ -274,15 +278,15 @@ const TrackDeliveryScreen = () => {
             </MutedText>
           </PortalCard>
 
-          {canModify ? (
+          {order ? (
             <CompactAction>
               <GradientButton
                 title={cancelOrder.isPending ? 'Cancelling…' : 'Cancel order'}
-                variant="danger"
+                variant={canCancel ? 'danger' : 'outline'}
                 size="compact"
                 fullWidth={false}
                 loading={cancelOrder.isPending}
-                disabled={cancelOrder.isPending}
+                disabled={!canCancel || cancelOrder.isPending}
                 onPress={() => {
                   Alert.alert('Cancel order', 'Cancel this order?', [
                     { text: 'No', style: 'cancel' },
@@ -292,6 +296,7 @@ const TrackDeliveryScreen = () => {
                       onPress: async () => {
                         try {
                           await cancelOrder.mutateAsync({ orderId });
+                          markOrderCancelledInCache(orderId);
                           await refetchAll();
                         } catch {}
                       },
@@ -299,6 +304,11 @@ const TrackDeliveryScreen = () => {
                   ]);
                 }}
               />
+              {!canCancel ? (
+                <DisabledActionHint>
+                  Only pending orders can be cancelled.
+                </DisabledActionHint>
+              ) : null}
             </CompactAction>
           ) : null}
         </>

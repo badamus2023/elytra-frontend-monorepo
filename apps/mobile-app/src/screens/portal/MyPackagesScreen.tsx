@@ -1,5 +1,5 @@
-import { useMemo, useState } from 'react';
-import { useNavigation } from '@react-navigation/native';
+import { useCallback, useMemo, useState } from 'react';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import styled from 'styled-components/native';
 import {
@@ -66,9 +66,16 @@ const Total = styled.Text`
 const MyPackagesScreen = () => {
   const navigation = useNavigation<Nav>();
   const ordersQuery = useOrders();
+  const { refetch: refetchOrders } = ordersQuery;
   const orders = useMemo(() => ordersQuery.data ?? [], [ordersQuery.data]);
   const [filter, setFilter] = useState<OrderFilter>('all');
   const [search, setSearch] = useState('');
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchOrders().catch(() => undefined);
+    }, [refetchOrders]),
+  );
 
   const filtered = useMemo(() => {
     return orders

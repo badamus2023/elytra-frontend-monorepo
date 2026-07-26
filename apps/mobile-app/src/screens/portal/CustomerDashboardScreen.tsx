@@ -1,7 +1,7 @@
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useWindowDimensions } from 'react-native';
 import { PackageCheck, Plane, Store } from 'lucide-react-native';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import styled from 'styled-components/native';
 import {
@@ -129,8 +129,15 @@ const CustomerDashboardScreen = () => {
   const { displayName } = useAuth();
   const ordersQuery = useOrders();
   const restaurantsQuery = useRestaurants();
+  const { refetch: refetchOrders } = ordersQuery;
   const orders = useMemo(() => ordersQuery.data ?? [], [ordersQuery.data]);
   const restaurants = restaurantsQuery.data ?? [];
+
+  useFocusEffect(
+    useCallback(() => {
+      refetchOrders().catch(() => undefined);
+    }, [refetchOrders]),
+  );
 
   const inTransit = useMemo(
     () => orders.filter((o) => orderInAir(o.status)).length,

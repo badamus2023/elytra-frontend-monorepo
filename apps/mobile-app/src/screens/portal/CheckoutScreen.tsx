@@ -21,7 +21,7 @@ import {
   confirmMobilePaymentIntent,
   createMobilePaymentIntent,
 } from '../../payments/mobilePayments';
-import { queryClient } from '../../api/queryClient';
+import { refreshOrderCache } from '../../api/orderCache';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 
 type Route = RouteProp<RestaurantsStackParamList, 'Checkout'>;
@@ -167,7 +167,7 @@ const CheckoutScreen = () => {
           throw new Error('Stripe payment confirmation is still pending.');
         }
 
-        await queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+        await refreshOrderCache(createdOrderId);
         cart.clearCart();
         navigation.replace('OrderConfirmed', { orderId: createdOrderId });
         return;
@@ -225,7 +225,7 @@ const CheckoutScreen = () => {
         throw new Error('Stripe completed the payment, but confirmation is still pending.');
       }
 
-      await queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+      await refreshOrderCache(orderId);
       cart.clearCart();
       navigation.replace('OrderConfirmed', { orderId });
     } catch (err) {
