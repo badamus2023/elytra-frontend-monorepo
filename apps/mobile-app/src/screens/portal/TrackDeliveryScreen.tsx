@@ -15,7 +15,7 @@ import {
   SectionTitle,
   SpacedTop,
 } from '../../components/portal';
-import type { OrderResponse, DispatchResponse } from '../../api/domain';
+import type { OrderResponse, DispatchResponse } from '../../api/model';
 import {
   getGetApiOrdersOrderIdQueryKey,
   useGetApiOrdersOrderId,
@@ -120,6 +120,8 @@ const TrackDeliveryScreen = () => {
 
   const order = orderQuery.data as OrderResponse | undefined;
   const dispatch = dispatchQuery.data as DispatchResponse | undefined;
+  const orderId = order?.id ?? activeId;
+  const dispatchId = dispatch?.id;
   const { markers, segments } = useOrderTrackingMap(order, dispatch);
 
   const status = (dispatch?.status ?? order?.status ?? 'Pending').toLowerCase();
@@ -173,9 +175,9 @@ const TrackDeliveryScreen = () => {
         <>
           <PortalCard
             title={
-              order.deliveryAddress || `Order ${order.id.slice(0, 8)}…`
+              order.deliveryAddress || `Order ${orderId.slice(0, 8)}…`
             }
-            description={order.id}
+            description={orderId}
             action={<PortalStatusPill value={dispatch?.status ?? order.status} />}
           >
             <DeliveryMap height={320} markers={markers} segments={segments} />
@@ -221,7 +223,7 @@ const TrackDeliveryScreen = () => {
             <SectionEyebrow>Dispatch</SectionEyebrow>
             <SectionTitle>
               {dispatch
-                ? `Drone ${dispatch.droneId.slice(0, 8)}…`
+                ? `Drone ${dispatch.droneId?.slice(0, 8) ?? 'unknown'}…`
                 : 'No dispatch yet'}
             </SectionTitle>
             <MutedText>
@@ -229,7 +231,7 @@ const TrackDeliveryScreen = () => {
                 ? `Last update ${dispatch.updatedAt ?? dispatch.createdAt}`
                 : 'A drone will be assigned when your delivery starts.'}
             </MutedText>
-            {dispatch && canModify ? (
+            {dispatch && dispatchId && canModify ? (
               <SpacedTop>
                 <GradientButton
                   title={
@@ -243,7 +245,7 @@ const TrackDeliveryScreen = () => {
                   onPress={async () => {
                     try {
                       await simulateDispatch.mutateAsync({
-                        dispatchId: dispatch.id,
+                        dispatchId,
                       });
                       await refetchAll();
                     } catch {}
@@ -257,8 +259,8 @@ const TrackDeliveryScreen = () => {
             <SectionEyebrow>Destination</SectionEyebrow>
             <SectionTitle>{order.deliveryAddress}</SectionTitle>
             <MutedText>
-              {order.deliveryLatitude.toFixed(4)},{' '}
-              {order.deliveryLongitude.toFixed(4)}
+              {order.deliveryLatitude?.toFixed(4) ?? '—'},{' '}
+              {order.deliveryLongitude?.toFixed(4) ?? '—'}
             </MutedText>
           </PortalCard>
 
@@ -276,7 +278,7 @@ const TrackDeliveryScreen = () => {
                     style: 'destructive',
                     onPress: async () => {
                       try {
-                        await cancelOrder.mutateAsync({ orderId: order.id });
+                        await cancelOrder.mutateAsync({ orderId });
                         await refetchAll();
                       } catch {}
                     },

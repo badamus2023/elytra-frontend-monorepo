@@ -28,6 +28,7 @@ export function RegisterPage() {
       email: String(fd.get('email') ?? '').trim(),
       password: String(fd.get('password') ?? ''),
       confirmPassword: String(fd.get('confirmPassword') ?? ''),
+      clientApp: 'customerWeb',
     }
     if (!payload.email || !payload.password) {
       setError('Email and password are required.')

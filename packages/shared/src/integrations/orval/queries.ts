@@ -30,7 +30,7 @@ import {
   getApiRestaurantsMine,
   getApiRestaurantApplications,
   getApiRestaurantApplicationsMine,
-  getApiDispatchesDroneHistory,
+  getApiDispatchesDroneDroneIdHistory,
 } from "../../api/client";
 import { assertOk, withAuth } from "../../api/withAuth";
 
@@ -186,7 +186,11 @@ export function useDroneFlightHistory(
   return useQuery({
     queryKey: ['drone-flight-history', droneId, from, to],
     queryFn: async () => {
-      const r = await getApiDispatchesDroneHistory(droneId, from, to, withAuth())
+      const r = await getApiDispatchesDroneDroneIdHistory(
+        droneId,
+        { from, to },
+        withAuth(),
+      )
       assertOk(r.status, r.data, 'Failed to load flight history')
       return r.data
     },

@@ -5,6 +5,16 @@ import { useAuth } from '../auth/AuthContext';
 import AppNavigator from './AppNavigator';
 import AuthNavigator from './AuthNavigator';
 
+const linking = {
+  prefixes: ['drones://'],
+  config: {
+    screens: {
+      VerifyEmail: 'verify-email',
+      ResetPassword: 'reset-password',
+    },
+  },
+};
+
 const LoadingContainer = styled.View`
   flex: 1;
   align-items: center;
@@ -24,7 +34,7 @@ const RootNavigator = () => {
   }
 
   return (
-    <NavigationContainer>
+    <NavigationContainer linking={linking}>
       {isLoggedIn ? <AppNavigator /> : <AuthNavigator />}
     </NavigationContainer>
   );

@@ -3,7 +3,7 @@ import { Link } from '@tanstack/react-router'
 import { useForgotPassword } from '@drones/shared/integrations/orval/mutations'
 
 export function ForgotPasswordPage() {
-  const forgot = useForgotPassword()
+  const forgot = useForgotPassword('adminWeb')
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
 

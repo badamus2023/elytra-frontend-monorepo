@@ -46,7 +46,7 @@ const RegisterScreen = () => {
     setFormError(null);
 
     try {
-      await mutateAsync({ data });
+      await mutateAsync({ data: { ...data, clientApp: 'mobile' } });
       setDone(true);
     } catch (error) {
       setFormError(getErrorMessage(error, 'Registration failed'));

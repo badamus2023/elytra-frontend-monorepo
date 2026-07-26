@@ -19,6 +19,7 @@ export function RegisterPage() {
         email: String(data.get('email') ?? '').trim(),
         password: String(data.get('password') ?? ''),
         confirmPassword: String(data.get('confirmPassword') ?? ''),
+        clientApp: 'restaurantWeb',
         companyName: String(data.get('companyName') ?? '').trim(),
         taxId: String(data.get('taxId') ?? '').trim(),
         contactPhone: String(data.get('contactPhone') ?? '').trim(),
@@ -45,6 +46,7 @@ export function RegisterPage() {
       <section className="max-w-lg rounded-2xl border border-emerald-400/30 bg-zinc-900 p-8">
         <h1 className="text-2xl font-semibold">Application submitted</h1>
         <p className="mt-3 text-zinc-400">Verify your email. An administrator must approve the company before the restaurant becomes available.</p>
+        <Link to="/verify-email" search={{ token: undefined }} className="mt-5 inline-block text-amber-400">Open email verification</Link>
         <Link to="/login" search={{ next: '/dashboard' }} className="mt-5 inline-block text-amber-400">Back to login</Link>
       </section>
     </main>

@@ -1,6 +1,9 @@
 import { useState } from 'react'
 import { useQueryClient, useMutation } from '@tanstack/react-query'
-import { postApiRestaurantApplicationsReview } from '@drones/shared/api/client'
+import {
+  postApiRestaurantApplicationsIdApprove,
+  postApiRestaurantApplicationsIdReject,
+} from '@drones/shared/api/client'
 import { withAuth, assertOk } from '@drones/shared/api/withAuth'
 import { useRestaurantApplications } from '@drones/shared/integrations/orval/queries'
 
@@ -10,7 +13,14 @@ export function RestaurantApplicationsPage() {
   const [notes, setNotes] = useState<Record<string, string>>({})
   const review = useMutation({
     mutationFn: async ({ id, action }: { id: string; action: 'approve' | 'reject' }) => {
-      const r = await postApiRestaurantApplicationsReview(id, action, notes[id] ?? '', withAuth())
+      const reviewApplication = action === 'approve'
+        ? postApiRestaurantApplicationsIdApprove
+        : postApiRestaurantApplicationsIdReject
+      const r = await reviewApplication(
+        id,
+        { adminNote: notes[id] ?? '' },
+        withAuth(),
+      )
       assertOk(r.status, r.data, 'Could not review application')
     },
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['restaurant-applications'] }),

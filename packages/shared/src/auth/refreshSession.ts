@@ -1,4 +1,4 @@
-import type { AuthResponse } from '../api/model'
+import { postApiAuthRefresh } from '../api/client'
 import { getRefreshToken, setSession, clearSession } from './session'
 
 let refreshPromise: Promise<boolean> | null = null
@@ -15,17 +15,12 @@ export async function refreshSession(): Promise<boolean> {
     }
 
     try {
-      const res = await fetch('/api/auth/refresh', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ refreshToken }),
-      })
-
-      if (!res.ok) {
+      const res = await postApiAuthRefresh({ refreshToken })
+      if (res.status < 200 || res.status >= 300) {
         return false
       }
 
-      const auth = (await res.json()) as AuthResponse
+      const auth = res.data
       if (!auth.accessToken) {
         return false
       }

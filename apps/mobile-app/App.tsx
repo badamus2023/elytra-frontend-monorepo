@@ -1,4 +1,5 @@
 import React from 'react';
+import './src/api/installAuthResponseInterceptor';
 import { QueryClientProvider } from '@tanstack/react-query';
 import { enableScreens } from 'react-native-screens';
 import { SafeAreaProvider } from 'react-native-safe-area-context';

@@ -15,7 +15,9 @@
     "android:mobile": "yarn workspace mobile-app android",
     "ios:mobile": "yarn workspace mobile-app ios:dev",
     "build": "yarn workspaces foreach -Apt --exclude mobile-app run build",
-    "orval": "yarn workspace @drones/shared orval",
+    "orval": "yarn orval:shared && yarn orval:mobile",
+    "orval:shared": "yarn workspace @drones/shared orval",
+    "orval:mobile": "yarn workspace mobile-app orval",
     "lint": "yarn workspaces foreach -Apt run lint"
   }
 }

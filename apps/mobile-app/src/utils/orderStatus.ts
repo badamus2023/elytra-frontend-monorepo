@@ -1,16 +1,16 @@
-export function orderInAir(status: string | undefined): boolean {
+export function orderInAir(status: string | null | undefined): boolean {
   const s = status?.toLowerCase() ?? '';
   return s === 'inflight' || s === 'dispatched';
 }
 
-export function orderDelivered(status: string | undefined): boolean {
+export function orderDelivered(status: string | null | undefined): boolean {
   return ['delivered', 'completed'].includes(status?.toLowerCase() ?? '');
 }
 
 export type OrderFilter = 'all' | 'active' | 'done';
 
 export function matchesOrderFilter(
-  status: string | undefined,
+  status: string | null | undefined,
   filter: OrderFilter,
 ): boolean {
   const s = status?.toLowerCase() ?? '';

@@ -10,6 +10,7 @@
     "android:dev": "ENVFILE=.env.development react-native run-android",
     "ios:dev": "ENVFILE=.env.development react-native run-ios",
     "lint": "eslint .",
+    "orval": "orval --config orval.config.ts",
     "start": "react-native start",
     "test": "jest"
   },

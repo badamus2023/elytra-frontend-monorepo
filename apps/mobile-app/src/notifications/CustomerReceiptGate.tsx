@@ -31,12 +31,13 @@ export function CustomerReceiptGate() {
     [orders],
   );
 
-  if (!isLoggedIn || !order?.id) return null;
+  const orderId = order?.id;
+  if (!isLoggedIn || !orderId) return null;
 
   const confirm = async () => {
     setError('');
     try {
-      await confirmReceipt.mutateAsync({ orderId: order.id });
+      await confirmReceipt.mutateAsync({ orderId });
       await queryClient.invalidateQueries();
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Could not confirm receipt.');
@@ -54,7 +55,7 @@ export function CustomerReceiptGate() {
           <Text style={styles.eyebrow}>DELIVERY ARRIVED</Text>
           <Text style={styles.title}>Confirm receipt</Text>
           <Text style={styles.body}>
-            Your drone reports that order {order.id.slice(0, 8)} reached{' '}
+            Your drone reports that order {orderId.slice(0, 8)} reached{' '}
             {order.deliveryAddress}. Confirm receipt to complete the order.
           </Text>
           <View style={styles.summary}>

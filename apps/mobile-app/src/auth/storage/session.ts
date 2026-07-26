@@ -1,5 +1,5 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import type { AuthUser } from '../../api/domain';
+import type { AuthUser } from '../sessionTypes';
 
 const USER_JSON_KEY = 'auth_user';
 

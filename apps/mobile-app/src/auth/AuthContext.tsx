@@ -7,7 +7,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import type { AuthResponse, AuthUser } from '../api/domain';
+import type { AuthSession, AuthUser } from './sessionTypes';
 import {
   clearUserName,
   getUserNameWithFallback,
@@ -23,7 +23,7 @@ type AuthContextValue = {
   displayName: string;
   refreshProfile: () => Promise<void>;
   setDisplayName: (name: string) => Promise<void>;
-  signIn: (response: AuthResponse) => Promise<void>;
+  signIn: (response: AuthSession) => Promise<void>;
   signOut: () => Promise<void>;
 };
 
@@ -51,7 +51,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setDisplayNameState(name.trim() || 'Customer');
   }, []);
 
-  const signIn = useCallback(async (response: AuthResponse) => {
+  const signIn = useCallback(async (response: AuthSession) => {
     await setToken(response.accessToken);
 
     if (response.refreshToken) {

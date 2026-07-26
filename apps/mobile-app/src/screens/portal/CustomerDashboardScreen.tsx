@@ -204,11 +204,11 @@ const CustomerDashboardScreen = () => {
             to place your first order.
           </MutedText>
         ) : (
-          orders.slice(0, 5).map((order) => (
-            <OrderRow key={order.id}>
+          orders.slice(0, 5).map((order, index) => (
+            <OrderRow key={order.id ?? `${order.createdAt ?? 'order'}-${index}`}>
               <OrderMain>
                 <OrderTitle>
-                  {order.deliveryAddress || `Order ${order.id.slice(0, 8)}…`}
+                  {order.deliveryAddress || `Order ${order.id?.slice(0, 8) ?? 'unknown'}…`}
                 </OrderTitle>
                 <OrderMeta>
                   {order.items?.length ?? 0} line item(s) ·{' '}

@@ -25,6 +25,9 @@ import { OwnerRestaurantPage } from '../pages/OwnerRestaurantPage'
 import { OwnerReviewsPage } from '../pages/OwnerReviewsPage'
 import { LoginPage } from './LoginPage'
 import { RegisterPage } from './RegisterPage'
+import { ForgotPasswordPage } from './ForgotPasswordPage'
+import { ResetPasswordPage } from './ResetPasswordPage'
+import { VerifyEmailPage } from './VerifyEmailPage'
 import { getRole, workspaceAuth } from '../auth/workspace'
 
 function guardOwner() {
@@ -128,6 +131,48 @@ const registerRoute = createRoute({
   component: RegisterPage,
 })
 
+const verifyEmailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/verify-email',
+  validateSearch: (record: Record<string, unknown>) => ({
+    token: typeof record.token === 'string' ? record.token : undefined,
+  }),
+  component: VerifyEmailPage,
+})
+
+const authVerifyEmailRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/auth/verify-email',
+  validateSearch: (record: Record<string, unknown>) => ({
+    token: typeof record.token === 'string' ? record.token : undefined,
+  }),
+  component: VerifyEmailPage,
+})
+
+const forgotPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/forgot-password',
+  component: ForgotPasswordPage,
+})
+
+const resetPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/reset-password',
+  validateSearch: (record: Record<string, unknown>) => ({
+    token: typeof record.token === 'string' ? record.token : undefined,
+  }),
+  component: ResetPasswordPage,
+})
+
+const authResetPasswordRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: '/auth/reset-password',
+  validateSearch: (record: Record<string, unknown>) => ({
+    token: typeof record.token === 'string' ? record.token : undefined,
+  }),
+  component: ResetPasswordPage,
+})
+
 const appRoute = createRoute({
   getParentRoute: () => rootRoute,
   id: 'owner-app',
@@ -169,6 +214,11 @@ const routeTree = rootRoute.addChildren([
   indexRoute,
   loginRoute,
   registerRoute,
+  verifyEmailRoute,
+  authVerifyEmailRoute,
+  forgotPasswordRoute,
+  resetPasswordRoute,
+  authResetPasswordRoute,
   appRoute.addChildren([
     dashboardRoute,
     ordersRoute,

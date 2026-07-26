@@ -84,8 +84,8 @@ const VerifyEmailScreen = () => {
       <Eyebrow>Account</Eyebrow>
       <Title>Confirm email</Title>
       <Subtitle>
-        Paste the token from your verification email. Opening the link in mail may
-        pre-fill it if you configure deep linking later.
+        Paste the token from your verification email. Opening the link on this
+        device will pre-fill it automatically.
       </Subtitle>
 
       {verified ? (

@@ -12,7 +12,7 @@ import {
 } from './AuthPageLayout'
 
 export function ForgotPasswordPage() {
-  const forgot = useForgotPassword()
+  const forgot = useForgotPassword('customerWeb')
   const [error, setError] = useState('')
   const [done, setDone] = useState(false)
 

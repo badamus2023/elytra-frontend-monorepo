@@ -19,7 +19,7 @@ export function VerifyEmailPage() {
   const [manualToken, setManualToken] = useState('')
   const token = search.token ?? manualToken
   const verify = useVerifyEmail()
-  const resend = useResendVerificationEmail()
+  const resend = useResendVerificationEmail('customerWeb')
   const [error, setError] = useState('')
   const [resendMsg, setResendMsg] = useState('')
 

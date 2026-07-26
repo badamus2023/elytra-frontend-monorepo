@@ -8,4 +8,6 @@
 export interface ForgotPasswordRequest {
   /** @nullable */
   email?: string | null;
+  /** @nullable */
+  clientApp?: string | null;
 }

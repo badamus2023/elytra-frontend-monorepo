@@ -20,8 +20,10 @@ import type {
   CreateReviewRequest,
   DeliveryPointResponse,
   DispatchResponse,
+  DroneFlightHistoryResponse,
   DroneResponse,
   ForgotPasswordRequest,
+  GetApiDispatchesDroneDroneIdHistoryParams,
   LoginRequest,
   MaintenanceLogResponse,
   MessageResponse,
@@ -31,11 +33,11 @@ import type {
   RefreshTokenRequest,
   RegisterRequest,
   RegisterRestaurantOwnerRequest,
-  RestaurantApplicationResponse,
-  DroneFlightHistoryResponse,
   ResetPasswordRequest,
+  RestaurantApplicationResponse,
   RestaurantResponse,
   ReviewResponse,
+  ReviewRestaurantApplicationRequest,
   UpdateCategoryRequest,
   UpdateDeliveryPointRequest,
   UpdateDroneRequest,
@@ -45,60 +47,6 @@ import type {
   UpdateReviewRequest,
   VerifyEmailRequest
 } from './model';
-
-export async function postApiAuthRegisterRestaurantOwner(
-  body: RegisterRestaurantOwnerRequest,
-  options?: RequestInit,
-) {
-  const res = await fetch('/api/auth/register-restaurant-owner', {
-    ...options, method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(body),
-  })
-  const text = await res.text()
-  return { data: text ? JSON.parse(text) : {}, status: res.status, headers: res.headers }
-}
-
-export async function getApiRestaurantApplications(options?: RequestInit) {
-  const res = await fetch('/api/restaurant-applications', options)
-  const text = await res.text()
-  return { data: (text ? JSON.parse(text) : []) as RestaurantApplicationResponse[], status: res.status, headers: res.headers }
-}
-
-export async function getApiRestaurantApplicationsMine(options?: RequestInit) {
-  const res = await fetch('/api/restaurant-applications/mine', options)
-  const text = await res.text()
-  return { data: (text ? JSON.parse(text) : {}) as RestaurantApplicationResponse, status: res.status, headers: res.headers }
-}
-
-export async function postApiRestaurantApplicationsReview(
-  id: string, action: 'approve' | 'reject', adminNote: string, options?: RequestInit,
-) {
-  const res = await fetch(`/api/restaurant-applications/${id}/${action}`, {
-    ...options, method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify({ adminNote }),
-  })
-  const text = await res.text()
-  return { data: text ? JSON.parse(text) : {}, status: res.status, headers: res.headers }
-}
-
-export async function getApiRestaurantsMine(options?: RequestInit) {
-  const res = await fetch('/api/restaurants/mine', options)
-  const text = await res.text()
-  return { data: text ? JSON.parse(text) : {}, status: res.status, headers: res.headers }
-}
-
-export async function getApiDispatchesDroneHistory(
-  droneId: string, from?: string, to?: string, options?: RequestInit,
-) {
-  const params = new URLSearchParams()
-  if (from) params.set('from', from)
-  if (to) params.set('to', to)
-  const res = await fetch(`/api/dispatches/drone/${droneId}/history?${params}`, options)
-  const text = await res.text()
-  return { data: (text ? JSON.parse(text) : []) as DroneFlightHistoryResponse[], status: res.status, headers: res.headers }
-}
 
 export type postApiAuthRegisterResponse200 = {
   data: AuthResponse
@@ -136,6 +84,46 @@ export const postApiAuthRegister = async (registerRequest: RegisterRequest, opti
   
   const data: postApiAuthRegisterResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as postApiAuthRegisterResponse
+}
+
+
+
+export type postApiAuthRegisterRestaurantOwnerResponse200 = {
+  data: AuthResponse
+  status: 200
+}
+    
+export type postApiAuthRegisterRestaurantOwnerResponseSuccess = (postApiAuthRegisterRestaurantOwnerResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiAuthRegisterRestaurantOwnerResponse = (postApiAuthRegisterRestaurantOwnerResponseSuccess)
+
+export const getPostApiAuthRegisterRestaurantOwnerUrl = () => {
+
+
+  
+
+  return `/api/auth/register-restaurant-owner`
+}
+
+export const postApiAuthRegisterRestaurantOwner = async (registerRestaurantOwnerRequest: RegisterRestaurantOwnerRequest, options?: RequestInit): Promise<postApiAuthRegisterRestaurantOwnerResponse> => {
+  
+  const res = await fetch(getPostApiAuthRegisterRestaurantOwnerUrl(),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      registerRestaurantOwnerRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  
+  const data: postApiAuthRegisterRestaurantOwnerResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiAuthRegisterRestaurantOwnerResponse
 }
 
 
@@ -1092,6 +1080,54 @@ export const postApiDispatchesDispatchIdSimulate = async (dispatchId: string, op
 
 
 
+export type getApiDispatchesDroneDroneIdHistoryResponse200 = {
+  data: DroneFlightHistoryResponse[]
+  status: 200
+}
+    
+export type getApiDispatchesDroneDroneIdHistoryResponseSuccess = (getApiDispatchesDroneDroneIdHistoryResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiDispatchesDroneDroneIdHistoryResponse = (getApiDispatchesDroneDroneIdHistoryResponseSuccess)
+
+export const getGetApiDispatchesDroneDroneIdHistoryUrl = (droneId: string,
+    params?: GetApiDispatchesDroneDroneIdHistoryParams,) => {
+  const normalizedParams = new URLSearchParams();
+
+  Object.entries(params || {}).forEach(([key, value]) => {
+    
+    if (value !== undefined) {
+      normalizedParams.append(key, value === null ? 'null' : value.toString())
+    }
+  });
+
+  const stringifiedParams = normalizedParams.toString();
+
+  return stringifiedParams.length > 0 ? `/api/dispatches/drone/${droneId}/history?${stringifiedParams}` : `/api/dispatches/drone/${droneId}/history`
+}
+
+export const getApiDispatchesDroneDroneIdHistory = async (droneId: string,
+    params?: GetApiDispatchesDroneDroneIdHistoryParams, options?: RequestInit): Promise<getApiDispatchesDroneDroneIdHistoryResponse> => {
+  
+  const res = await fetch(getGetApiDispatchesDroneDroneIdHistoryUrl(droneId,params),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  
+  const data: getApiDispatchesDroneDroneIdHistoryResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiDispatchesDroneDroneIdHistoryResponse
+}
+
+
+
 export type postApiDronesResponse200 = {
   data: DroneResponse
   status: 200
@@ -1682,22 +1718,42 @@ export const postApiOrdersOrderIdCancel = async (orderId: string, options?: Requ
   return { data, status: res.status, headers: res.headers } as postApiOrdersOrderIdCancelResponse
 }
 
-export type postApiOrdersOrderIdConfirmReceiptResponse = {
+
+
+export type postApiOrdersOrderIdConfirmReceiptResponse200 = {
   data: OrderResponse
   status: 200
-  headers: Headers
+}
+    
+export type postApiOrdersOrderIdConfirmReceiptResponseSuccess = (postApiOrdersOrderIdConfirmReceiptResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiOrdersOrderIdConfirmReceiptResponse = (postApiOrdersOrderIdConfirmReceiptResponseSuccess)
+
+export const getPostApiOrdersOrderIdConfirmReceiptUrl = (orderId: string,) => {
+
+
+  
+
+  return `/api/orders/${orderId}/confirm-receipt`
 }
 
-export const postApiOrdersOrderIdConfirmReceipt = async (
-  orderId: string,
-  options?: RequestInit,
-): Promise<postApiOrdersOrderIdConfirmReceiptResponse> => {
-  const res = await fetch(`/api/orders/${orderId}/confirm-receipt`, {
+export const postApiOrdersOrderIdConfirmReceipt = async (orderId: string, options?: RequestInit): Promise<postApiOrdersOrderIdConfirmReceiptResponse> => {
+  
+  const res = await fetch(getPostApiOrdersOrderIdConfirmReceiptUrl(orderId),
+  {      
     ...options,
-    method: 'POST',
-  })
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text()
-  const data = body ? JSON.parse(body) : {}
+    method: 'POST'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  
+  const data: postApiOrdersOrderIdConfirmReceiptResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as postApiOrdersOrderIdConfirmReceiptResponse
 }
 
@@ -2291,6 +2347,205 @@ export const deleteApiRestaurantsId = async (id: string, options?: RequestInit):
   
   const data: deleteApiRestaurantsIdResponse['data'] = body ? JSON.parse(body) : {}
   return { data, status: res.status, headers: res.headers } as deleteApiRestaurantsIdResponse
+}
+
+
+
+export type getApiRestaurantsMineResponse200 = {
+  data: RestaurantResponse
+  status: 200
+}
+    
+export type getApiRestaurantsMineResponseSuccess = (getApiRestaurantsMineResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiRestaurantsMineResponse = (getApiRestaurantsMineResponseSuccess)
+
+export const getGetApiRestaurantsMineUrl = () => {
+
+
+  
+
+  return `/api/restaurants/mine`
+}
+
+export const getApiRestaurantsMine = async ( options?: RequestInit): Promise<getApiRestaurantsMineResponse> => {
+  
+  const res = await fetch(getGetApiRestaurantsMineUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  
+  const data: getApiRestaurantsMineResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiRestaurantsMineResponse
+}
+
+
+
+export type getApiRestaurantApplicationsResponse200 = {
+  data: RestaurantApplicationResponse[]
+  status: 200
+}
+    
+export type getApiRestaurantApplicationsResponseSuccess = (getApiRestaurantApplicationsResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiRestaurantApplicationsResponse = (getApiRestaurantApplicationsResponseSuccess)
+
+export const getGetApiRestaurantApplicationsUrl = () => {
+
+
+  
+
+  return `/api/restaurant-applications`
+}
+
+export const getApiRestaurantApplications = async ( options?: RequestInit): Promise<getApiRestaurantApplicationsResponse> => {
+  
+  const res = await fetch(getGetApiRestaurantApplicationsUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  
+  const data: getApiRestaurantApplicationsResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiRestaurantApplicationsResponse
+}
+
+
+
+export type getApiRestaurantApplicationsMineResponse200 = {
+  data: RestaurantApplicationResponse
+  status: 200
+}
+    
+export type getApiRestaurantApplicationsMineResponseSuccess = (getApiRestaurantApplicationsMineResponse200) & {
+  headers: Headers;
+};
+;
+
+export type getApiRestaurantApplicationsMineResponse = (getApiRestaurantApplicationsMineResponseSuccess)
+
+export const getGetApiRestaurantApplicationsMineUrl = () => {
+
+
+  
+
+  return `/api/restaurant-applications/mine`
+}
+
+export const getApiRestaurantApplicationsMine = async ( options?: RequestInit): Promise<getApiRestaurantApplicationsMineResponse> => {
+  
+  const res = await fetch(getGetApiRestaurantApplicationsMineUrl(),
+  {      
+    ...options,
+    method: 'GET'
+    
+    
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  
+  const data: getApiRestaurantApplicationsMineResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getApiRestaurantApplicationsMineResponse
+}
+
+
+
+export type postApiRestaurantApplicationsIdApproveResponse200 = {
+  data: RestaurantApplicationResponse
+  status: 200
+}
+    
+export type postApiRestaurantApplicationsIdApproveResponseSuccess = (postApiRestaurantApplicationsIdApproveResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiRestaurantApplicationsIdApproveResponse = (postApiRestaurantApplicationsIdApproveResponseSuccess)
+
+export const getPostApiRestaurantApplicationsIdApproveUrl = (id: string,) => {
+
+
+  
+
+  return `/api/restaurant-applications/${id}/approve`
+}
+
+export const postApiRestaurantApplicationsIdApprove = async (id: string,
+    reviewRestaurantApplicationRequest: ReviewRestaurantApplicationRequest, options?: RequestInit): Promise<postApiRestaurantApplicationsIdApproveResponse> => {
+  
+  const res = await fetch(getPostApiRestaurantApplicationsIdApproveUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      reviewRestaurantApplicationRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  
+  const data: postApiRestaurantApplicationsIdApproveResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiRestaurantApplicationsIdApproveResponse
+}
+
+
+
+export type postApiRestaurantApplicationsIdRejectResponse200 = {
+  data: RestaurantApplicationResponse
+  status: 200
+}
+    
+export type postApiRestaurantApplicationsIdRejectResponseSuccess = (postApiRestaurantApplicationsIdRejectResponse200) & {
+  headers: Headers;
+};
+;
+
+export type postApiRestaurantApplicationsIdRejectResponse = (postApiRestaurantApplicationsIdRejectResponseSuccess)
+
+export const getPostApiRestaurantApplicationsIdRejectUrl = (id: string,) => {
+
+
+  
+
+  return `/api/restaurant-applications/${id}/reject`
+}
+
+export const postApiRestaurantApplicationsIdReject = async (id: string,
+    reviewRestaurantApplicationRequest: ReviewRestaurantApplicationRequest, options?: RequestInit): Promise<postApiRestaurantApplicationsIdRejectResponse> => {
+  
+  const res = await fetch(getPostApiRestaurantApplicationsIdRejectUrl(id),
+  {      
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      reviewRestaurantApplicationRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+  
+  const data: postApiRestaurantApplicationsIdRejectResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as postApiRestaurantApplicationsIdRejectResponse
 }
 
 

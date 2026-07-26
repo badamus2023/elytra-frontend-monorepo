@@ -69,7 +69,7 @@ export function DeliveryMap({
 
   return (
     <div
-      className="overflow-hidden rounded-xl border border-slate-200 [&_.leaflet-container]:rounded-xl"
+      className="relative z-0 overflow-hidden rounded-xl border border-slate-200 [&_.leaflet-container]:rounded-xl"
       style={{ height }}
     >
       <MapContainer

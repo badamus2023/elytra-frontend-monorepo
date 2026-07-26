@@ -36,7 +36,7 @@ const ForgotPasswordScreen = () => {
     setFormError(null);
 
     try {
-      await mutateAsync({ data });
+      await mutateAsync({ data: { ...data, clientApp: 'mobile' } });
       navigation.navigate('Login', { resetEmailSent: true });
     } catch (error) {
       setFormError(getErrorMessage(error, 'Could not send reset email'));

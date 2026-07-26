@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { DispatchResponse, OrderResponse } from '../api/domain';
+import type { DispatchResponse, OrderResponse } from '../api/model';
 import type { MapMarker, MapSegment } from '../components/map/types';
 
 export function useOrderTrackingMap(
@@ -7,7 +7,11 @@ export function useOrderTrackingMap(
   dispatch: DispatchResponse | undefined,
 ) {
   const markers = useMemo((): MapMarker[] => {
-    if (!order) {
+    if (
+      !order ||
+      order.deliveryLatitude === undefined ||
+      order.deliveryLongitude === undefined
+    ) {
       return [];
     }
 
@@ -20,7 +24,11 @@ export function useOrderTrackingMap(
       },
     ];
 
-    if (dispatch) {
+    if (
+      dispatch &&
+      dispatch.droneLatitude !== undefined &&
+      dispatch.droneLongitude !== undefined
+    ) {
       result.push({
         id: 'drone',
         label: `Drone (${dispatch.status})`,
@@ -33,7 +41,14 @@ export function useOrderTrackingMap(
   }, [order, dispatch]);
 
   const segments = useMemo((): MapSegment[] => {
-    if (!order || !dispatch) {
+    if (
+      !order ||
+      !dispatch ||
+      order.deliveryLatitude === undefined ||
+      order.deliveryLongitude === undefined ||
+      dispatch.droneLatitude === undefined ||
+      dispatch.droneLongitude === undefined
+    ) {
       return [];
     }
 

@@ -1,4 +1,4 @@
-import type { AuthUser } from '../api/domain';
+import type { AuthUser } from './sessionTypes';
 import {
   getStoredDisplayName,
   removeStoredDisplayName,

@@ -12,4 +12,6 @@ export interface RegisterRequest {
   password?: string | null;
   /** @nullable */
   confirmPassword?: string | null;
+  /** @nullable */
+  clientApp?: string | null;
 }

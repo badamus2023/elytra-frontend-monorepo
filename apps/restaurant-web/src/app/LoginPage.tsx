@@ -95,6 +95,15 @@ export function LoginPage() {
             Submit an application
           </Link>
         </p>
+        <p className="mt-3 text-center text-xs text-zinc-500">
+          <Link to="/forgot-password" className="text-amber-400 hover:underline">
+            Forgot password?
+          </Link>
+          {' · '}
+          <Link to="/verify-email" search={{ token: undefined }} className="text-amber-400 hover:underline">
+            Confirm email
+          </Link>
+        </p>
       </section>
     </div>
   )

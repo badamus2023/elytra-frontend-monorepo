@@ -24,7 +24,7 @@ export function FormModal({
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 p-4">
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-4">
       <form onSubmit={onSubmit} className="w-full max-w-md rounded-xl border border-white/10 bg-zinc-900 p-4">
         <h3 className="text-lg font-semibold text-zinc-100">{title}</h3>
         <div className="mt-4 space-y-3">{children}</div>

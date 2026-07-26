@@ -74,7 +74,7 @@ const MyPackagesScreen = () => {
         }
         const t = search.toLowerCase();
         return (
-          order.id.toLowerCase().includes(t) ||
+          (order.id?.toLowerCase().includes(t) ?? false) ||
           (order.deliveryAddress ?? '').toLowerCase().includes(t)
         );
       });
@@ -99,10 +99,10 @@ const MyPackagesScreen = () => {
               : 'No orders match your filter.'}
           </EmptyText>
         ) : (
-          filtered.map((item) => (
-            <Row key={item.id}>
+          filtered.map((item, index) => (
+            <Row key={item.id ?? `${item.createdAt ?? 'order'}-${index}`}>
               <RowMain>
-                <OrderId>{item.id.slice(0, 8)}…</OrderId>
+                <OrderId>{item.id?.slice(0, 8) ?? 'Unknown'}…</OrderId>
                 <Address>{item.deliveryAddress || '—'}</Address>
                 <Total>{Number(item.totalAmount ?? 0).toFixed(2)}</Total>
               </RowMain>
@@ -110,9 +110,11 @@ const MyPackagesScreen = () => {
                 <PortalStatusPill value={item.status} />
                 <TextLink
                   title="Track"
-                  onPress={() =>
-                    navigation.navigate('Track', { orderId: item.id })
-                  }
+                  onPress={() => {
+                    if (item.id) {
+                      navigation.navigate('Track', { orderId: item.id });
+                    }
+                  }}
                 />
               </RowEnd>
             </Row>

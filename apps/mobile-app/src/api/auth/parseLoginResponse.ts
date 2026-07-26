@@ -1,6 +1,6 @@
-import type { AuthResponse } from '../domain';
+import type { AuthSession } from '../../auth/sessionTypes';
 
-export const parseLoginResponse = (data: unknown): AuthResponse => {
+export const parseLoginResponse = (data: unknown): AuthSession => {
   if (!data || typeof data !== 'object') {
     throw new Error('Invalid login response');
   }

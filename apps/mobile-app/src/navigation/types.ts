@@ -10,7 +10,7 @@ export type AuthStackParamList = {
   Register: undefined;
   VerifyEmail: { token?: string } | undefined;
   ForgotPassword: undefined;
-  ResetPassword: undefined;
+  ResetPassword: { token?: string } | undefined;
 };
 
 export type PortalTabParamList = {

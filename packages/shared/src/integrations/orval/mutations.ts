@@ -51,6 +51,8 @@ import {
   postApiReviews,
 } from '../../api/client'
 import { assertOk, withAuth } from '../../api/withAuth'
+
+type AuthClientApp = 'customerWeb' | 'adminWeb' | 'restaurantWeb' | 'mobile'
 function useInvalidate(keys: string[]) {
   const queryClient = useQueryClient()
   return () => {
@@ -335,11 +337,11 @@ export function useVerifyEmail() {
   })
 }
 
-export function useResendVerificationEmail() {
+export function useResendVerificationEmail(clientApp: AuthClientApp) {
   return useMutation({
     mutationFn: async (email: string) => {
       const r = await postApiAuthResendVerification(
-        { email },
+        { email, clientApp },
         { headers: { 'Content-Type': 'application/json' } },
       )
       assertOk(r.status, r.data, 'Could not resend email')
@@ -347,11 +349,11 @@ export function useResendVerificationEmail() {
   })
 }
 
-export function useForgotPassword() {
+export function useForgotPassword(clientApp: AuthClientApp) {
   return useMutation({
     mutationFn: async (email: string) => {
       const r = await postApiAuthForgotPassword(
-        { email },
+        { email, clientApp },
         { headers: { 'Content-Type': 'application/json' } },
       )
       assertOk(r.status, r.data, 'Request failed')

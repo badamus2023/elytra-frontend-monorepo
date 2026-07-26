@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { ActivityIndicator } from 'react-native';
 import { useForm } from 'react-hook-form';
-import { useNavigation } from '@react-navigation/native';
+import { useNavigation, useRoute } from '@react-navigation/native';
+import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import {
   AuthScreen,
@@ -19,20 +20,28 @@ type ResetPasswordNavigation = NativeStackNavigationProp<
   AuthStackParamList,
   'ResetPassword'
 >;
+type ResetPasswordRoute = RouteProp<AuthStackParamList, 'ResetPassword'>;
 
 const ResetPasswordScreen = () => {
   const navigation = useNavigation<ResetPasswordNavigation>();
+  const route = useRoute<ResetPasswordRoute>();
   const [formError, setFormError] = useState<string | null>(null);
 
-  const { control, handleSubmit, getValues } = useForm<ResetPasswordRequest>({
+  const { control, handleSubmit, getValues, setValue } = useForm<ResetPasswordRequest>({
     defaultValues: {
-      token: '',
+      token: route.params?.token ?? '',
       newPassword: '',
       confirmPassword: '',
     },
   });
 
   const { mutateAsync, isPending } = usePostApiAuthResetPassword();
+
+  useEffect(() => {
+    if (route.params?.token) {
+      setValue('token', route.params.token);
+    }
+  }, [route.params?.token, setValue]);
 
   const onSubmit = async (data: ResetPasswordRequest) => {
     setFormError(null);
