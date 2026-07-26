@@ -1,5 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Pressable } from 'react-native';
+import Config from 'react-native-config';
+import { useStripe } from '@stripe/stripe-react-native';
+import { useMutation } from '@tanstack/react-query';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
@@ -14,6 +17,11 @@ import {
   PortalScreen,
 } from '../../components/portal';
 import type { RestaurantsStackParamList } from '../../navigation/types';
+import {
+  confirmMobilePaymentIntent,
+  createMobilePaymentIntent,
+} from '../../payments/mobilePayments';
+import { queryClient } from '../../api/queryClient';
 import { getErrorMessage } from '../../utils/getErrorMessage';
 
 type Route = RouteProp<RestaurantsStackParamList, 'Checkout'>;
@@ -94,13 +102,24 @@ const CheckoutScreen = () => {
   const route = useRoute<Route>();
   const navigation = useNavigation<Nav>();
   const cart = useCart();
+  const { initPaymentSheet, presentPaymentSheet } = useStripe();
   const createOrder = usePostApiOrders();
+  const createPaymentIntent = useMutation({
+    mutationFn: createMobilePaymentIntent,
+  });
+  const confirmPaymentIntent = useMutation({
+    mutationFn: confirmMobilePaymentIntent,
+  });
   const { data: deliveryPoints, isLoading: pointsLoading } = useGetApiDeliveryPoints();
   const { restaurantId } = route.params;
 
   const [deliveryPointId, setDeliveryPointId] = useState('');
   const [deliveryNotes, setDeliveryNotes] = useState('');
   const [error, setError] = useState<string | null>(null);
+  const [createdOrderId, setCreatedOrderId] = useState<string | null>(null);
+  const [submittedPaymentIntentId, setSubmittedPaymentIntentId] = useState<
+    string | null
+  >(null);
 
   useEffect(() => {
     if (!deliveryPointId && deliveryPoints?.length) {
@@ -133,21 +152,82 @@ const CheckoutScreen = () => {
     }
 
     try {
-      await createOrder.mutateAsync({
-        data: {
-          restaurantId,
-          deliveryPointId,
-          ...(deliveryNotes.trim()
-            ? { deliveryAddress: deliveryNotes.trim() }
-            : {}),
-          items: cart.lines.map((line) => ({
-            productId: line.productId,
-            quantity: line.quantity,
-          })),
-        },
+      if (!Config.STRIPE_PUBLISHABLE_KEY?.trim()) {
+        setError(
+          'Stripe is not configured. Set STRIPE_PUBLISHABLE_KEY and rebuild the app.',
+        );
+        return;
+      }
+
+      if (createdOrderId && submittedPaymentIntentId) {
+        const payment = await confirmPaymentIntent.mutateAsync(
+          submittedPaymentIntentId,
+        );
+        if (payment.paymentStatus?.toLowerCase() !== 'completed') {
+          throw new Error('Stripe payment confirmation is still pending.');
+        }
+
+        await queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
+        cart.clearCart();
+        navigation.replace('OrderConfirmed', { orderId: createdOrderId });
+        return;
+      }
+
+      let orderId = createdOrderId;
+      if (!orderId) {
+        const order = await createOrder.mutateAsync({
+          data: {
+            restaurantId,
+            deliveryPointId,
+            ...(deliveryNotes.trim()
+              ? { deliveryAddress: deliveryNotes.trim() }
+              : {}),
+            items: cart.lines.map((line) => ({
+              productId: line.productId,
+              quantity: line.quantity,
+            })),
+          },
+        });
+
+        if (!order.id) {
+          throw new Error('Order was created but no order id was returned.');
+        }
+        orderId = order.id;
+        setCreatedOrderId(orderId);
+      }
+
+      const intent = await createPaymentIntent.mutateAsync(orderId);
+      if (!intent.clientSecret || !intent.paymentIntentId) {
+        throw new Error('Stripe did not return the payment details.');
+      }
+
+      const { error: initError } = await initPaymentSheet({
+        merchantDisplayName: 'Drones',
+        paymentIntentClientSecret: intent.clientSecret,
+        returnURL: 'drones://stripe-redirect',
       });
+      if (initError) {
+        throw new Error(initError.message);
+      }
+
+      const { error: paymentError } = await presentPaymentSheet();
+      if (paymentError) {
+        if (paymentError.code === 'Canceled') {
+          setError('Payment was cancelled. Tap Pay with Stripe to try again.');
+          return;
+        }
+        throw new Error(paymentError.message);
+      }
+
+      setSubmittedPaymentIntentId(intent.paymentIntentId);
+      const payment = await confirmPaymentIntent.mutateAsync(intent.paymentIntentId);
+      if (payment.paymentStatus?.toLowerCase() !== 'completed') {
+        throw new Error('Stripe completed the payment, but confirmation is still pending.');
+      }
+
+      await queryClient.invalidateQueries({ queryKey: ['/api/orders'] });
       cart.clearCart();
-      navigation.replace('OrderConfirmed', { orderId: 'pending' });
+      navigation.replace('OrderConfirmed', { orderId });
     } catch (err) {
       setError(getErrorMessage(err, 'Could not place your order.'));
     }
@@ -203,8 +283,13 @@ const CheckoutScreen = () => {
         />
         {error ? <ErrorText>{error}</ErrorText> : null}
         <GradientButton
-          title="Place order"
-          loading={createOrder.isPending}
+          title="Pay with Stripe"
+          variant="checkout"
+          loading={
+            createOrder.isPending ||
+            createPaymentIntent.isPending ||
+            confirmPaymentIntent.isPending
+          }
           disabled={
             pointsLoading ||
             (deliveryPoints ?? []).length === 0 ||
