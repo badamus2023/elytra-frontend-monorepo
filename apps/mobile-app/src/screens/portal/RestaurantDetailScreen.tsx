@@ -1,9 +1,10 @@
 import { useMemo } from 'react';
 import { View } from 'react-native';
+import { Plus, ShoppingBag } from 'lucide-react-native';
 import { useNavigation, useRoute } from '@react-navigation/native';
 import type { RouteProp } from '@react-navigation/native';
 import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import styled from 'styled-components/native';
+import styled, { useTheme } from 'styled-components/native';
 import { GradientButton } from '../../components/portal/GradientButton';
 import {
   MutedText,
@@ -33,6 +34,7 @@ const ProductRow = styled.View`
 
 const ProductMain = styled.View`
   flex: 1;
+  min-width: 0;
 `;
 
 const ProductName = styled.Text`
@@ -48,6 +50,7 @@ const ProductDescription = styled.Text`
 `;
 
 const ProductPrice = styled.Text`
+  flex-shrink: 0;
   font-size: 14px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text};
@@ -64,19 +67,39 @@ const CategoryTitle = styled.Text`
 
 const CartBar = styled.View`
   margin-top: 16px;
-  padding: 12px;
-  border-radius: ${({ theme }) => theme.radius.lg}px;
-  background-color: ${({ theme }) => theme.colors.indigo};
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 16px;
+  border-width: 1px;
+  border-color: ${({ theme }) => theme.colors.orangeBorder};
+  border-radius: ${({ theme }) => theme.radius.xl}px;
+  background-color: ${({ theme }) => theme.colors.white};
+  shadow-color: #0f172a;
+  shadow-offset: 0px 4px;
+  shadow-opacity: 0.12;
+  shadow-radius: 8px;
+  elevation: 4;
+`;
+
+const CartSummary = styled.View`
+  min-width: 150px;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
 `;
 
 const CartBarText = styled.Text`
-  margin-bottom: 8px;
   font-size: 14px;
-  font-weight: 600;
-  color: ${({ theme }) => theme.colors.white};
+  font-weight: 500;
+  color: ${({ theme }) => theme.colors.textSecondary};
 `;
 
 const RestaurantDetailScreen = () => {
+  const theme = useTheme();
   const route = useRoute<Route>();
   const navigation = useNavigation<Nav>();
   const { restaurantId } = route.params;
@@ -161,7 +184,11 @@ const RestaurantDetailScreen = () => {
                           {Number(product.price ?? 0).toFixed(2)}
                         </ProductPrice>
                         <GradientButton
-                          title="+"
+                          title="Add item"
+                          accessibilityLabel={`Add ${product.name ?? 'item'} to cart`}
+                          icon={<Plus color="#ffffff" size={18} />}
+                          size="icon"
+                          fullWidth={false}
                           onPress={() =>
                             onAdd(
                               product.id!,
@@ -187,7 +214,11 @@ const RestaurantDetailScreen = () => {
                       </ProductMain>
                       <ProductPrice>{Number(product.price ?? 0).toFixed(2)}</ProductPrice>
                       <GradientButton
-                        title="+"
+                        title="Add item"
+                        accessibilityLabel={`Add ${product.name ?? 'item'} to cart`}
+                        icon={<Plus color="#ffffff" size={18} />}
+                        size="icon"
+                        fullWidth={false}
                         onPress={() =>
                           onAdd(
                             product.id!,
@@ -207,11 +238,17 @@ const RestaurantDetailScreen = () => {
 
       {cart.restaurantId === restaurantId && cart.itemCount > 0 ? (
         <CartBar>
-          <CartBarText>
-            {cart.itemCount} item(s) · {cart.subtotal.toFixed(2)}
-          </CartBarText>
+          <CartSummary>
+            <ShoppingBag size={18} color={theme.colors.orange} />
+            <CartBarText>
+              {cart.itemCount} item(s) · {cart.subtotal.toFixed(2)} PLN
+            </CartBarText>
+          </CartSummary>
           <GradientButton
             title="Review order"
+            variant="checkout"
+            size="compact"
+            fullWidth={false}
             onPress={() => navigation.navigate('Checkout', { restaurantId })}
           />
         </CartBar>

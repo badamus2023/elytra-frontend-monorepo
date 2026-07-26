@@ -28,6 +28,8 @@ export const theme = {
     indigo: '#6366f1',
     emerald: '#10b981',
     amber: '#f59e0b',
+    orange: '#f97316',
+    orangeBorder: '#fed7aa',
     violet: '#8b5cf6',
     white: '#ffffff',
     rose: '#e11d48',

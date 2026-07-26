@@ -3,6 +3,7 @@ declare module 'react-native-config' {
     API_URL?: string;
     NOTIFICATION_HUB_URL?: string;
     GOOGLE_MAPS_API_KEY?: string;
+    STRIPE_PUBLISHABLE_KEY?: string;
   }
 
   export const Config: NativeConfig;

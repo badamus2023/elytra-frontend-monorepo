@@ -45,6 +45,11 @@ const FieldValue = styled.Text`
   color: ${({ theme }) => theme.colors.text};
 `;
 
+const SaveAction = styled.View`
+  margin-top: ${({ theme }) => theme.spacing.lg}px;
+  align-items: flex-end;
+`;
+
 const CustomerProfileScreen = () => {
   const { user, displayName, setDisplayName } = useAuth();
   const [name, setName] = useState(displayName);
@@ -73,7 +78,14 @@ const CustomerProfileScreen = () => {
             <SavedText>Profile updated.</SavedText>
           </SavedBanner>
         ) : null}
-        <GradientButton title="Save changes" onPress={onSave} />
+        <SaveAction>
+          <GradientButton
+            title="Save changes"
+            size="compact"
+            fullWidth={false}
+            onPress={onSave}
+          />
+        </SaveAction>
       </PortalCard>
 
       <PortalCard title="Your account">

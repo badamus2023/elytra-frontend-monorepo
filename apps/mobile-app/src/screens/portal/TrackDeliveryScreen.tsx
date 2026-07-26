@@ -97,6 +97,10 @@ const TotalLine = styled.Text`
   color: ${({ theme }) => theme.colors.textMuted};
 `;
 
+const CompactAction = styled.View`
+  align-items: flex-end;
+`;
+
 const TrackDeliveryScreen = () => {
   const route = useRoute<TrackRoute>();
   const [query, setQuery] = useState(route.params?.orderId ?? '');
@@ -157,10 +161,14 @@ const TrackDeliveryScreen = () => {
           placeholder="e.g. f47ac10b-58cc-4372-a567-0e02b2c3d479"
           autoCapitalize="none"
         />
-        <GradientButton
-          title="Load order"
-          onPress={() => setActiveId(query.trim())}
-        />
+        <CompactAction>
+          <GradientButton
+            title="Load order"
+            size="compact"
+            fullWidth={false}
+            onPress={() => setActiveId(query.trim())}
+          />
+        </CompactAction>
       </PortalCard>
 
       {activeId && orderQuery.isError ? (
@@ -240,6 +248,8 @@ const TrackDeliveryScreen = () => {
                       : 'Simulate flight (demo)'
                   }
                   variant="warning"
+                  size="compact"
+                  fullWidth={false}
                   loading={simulateDispatch.isPending}
                   disabled={simulateDispatch.isPending}
                   onPress={async () => {
@@ -265,27 +275,31 @@ const TrackDeliveryScreen = () => {
           </PortalCard>
 
           {canModify ? (
-            <GradientButton
-              title={cancelOrder.isPending ? 'Cancelling…' : 'Cancel order'}
-              variant="danger"
-              loading={cancelOrder.isPending}
-              disabled={cancelOrder.isPending}
-              onPress={() => {
-                Alert.alert('Cancel order', 'Cancel this order?', [
-                  { text: 'No', style: 'cancel' },
-                  {
-                    text: 'Yes',
-                    style: 'destructive',
-                    onPress: async () => {
-                      try {
-                        await cancelOrder.mutateAsync({ orderId });
-                        await refetchAll();
-                      } catch {}
+            <CompactAction>
+              <GradientButton
+                title={cancelOrder.isPending ? 'Cancelling…' : 'Cancel order'}
+                variant="danger"
+                size="compact"
+                fullWidth={false}
+                loading={cancelOrder.isPending}
+                disabled={cancelOrder.isPending}
+                onPress={() => {
+                  Alert.alert('Cancel order', 'Cancel this order?', [
+                    { text: 'No', style: 'cancel' },
+                    {
+                      text: 'Yes',
+                      style: 'destructive',
+                      onPress: async () => {
+                        try {
+                          await cancelOrder.mutateAsync({ orderId });
+                          await refetchAll();
+                        } catch {}
+                      },
                     },
-                  },
-                ]);
-              }}
-            />
+                  ]);
+                }}
+              />
+            </CompactAction>
           ) : null}
         </>
       ) : null}

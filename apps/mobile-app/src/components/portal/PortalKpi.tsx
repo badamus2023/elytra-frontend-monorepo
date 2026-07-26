@@ -19,25 +19,21 @@ const tones: Record<NonNullable<PortalKpiProps['tone']>, string> = {
 const Card = styled.View`
   flex-direction: row;
   align-items: flex-start;
-  gap: ${({ theme }) => theme.spacing.md}px;
+  gap: ${({ theme }) => theme.spacing.sm}px;
   border-radius: ${({ theme }) => theme.radius.xl}px;
   border-width: 1px;
   border-color: ${({ theme }) => theme.colors.border};
   background-color: ${({ theme }) => theme.colors.white};
-  padding: ${({ theme }) => theme.spacing.lg}px;
+  padding: ${({ theme }) => theme.spacing.md}px;
 `;
 
 const IconWrap = styled.View<{ $color: string }>`
-  width: 44px;
-  height: 44px;
+  width: 40px;
+  height: 40px;
   border-radius: ${({ theme }) => theme.radius.lg}px;
   align-items: center;
   justify-content: center;
   background-color: ${({ $color }) => $color};
-`;
-
-const IconText = styled.Text`
-  font-size: 18px;
 `;
 
 const Label = styled.Text`
@@ -75,11 +71,13 @@ export const PortalKpi = ({
     <Card>
       {icon ? (
         <IconWrap $color={tones[tone]}>
-          <IconText>{icon}</IconText>
+          {icon}
         </IconWrap>
       ) : null}
       <Body>
-        <Label>{label}</Label>
+        <Label numberOfLines={1} adjustsFontSizeToFit minimumFontScale={0.8}>
+          {label}
+        </Label>
         <Value>{value}</Value>
         {hint ? <Hint>{hint}</Hint> : null}
       </Body>

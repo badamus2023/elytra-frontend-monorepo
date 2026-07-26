@@ -13,6 +13,7 @@ import { ToastProvider } from './src/notifications/ToastProvider';
 import { RealtimeNotifications } from './src/notifications/RealtimeNotifications';
 import { CustomerReceiptGate } from './src/notifications/CustomerReceiptGate';
 import { useAuth } from './src/auth/AuthContext';
+import { StripeAppProvider } from './src/payments/StripeAppProvider';
 
 enableScreens(true);
 
@@ -29,20 +30,22 @@ function AuthenticatedNotificationLayer() {
 
 function App(): React.JSX.Element {
   return (
-    <SafeAreaProvider>
-      <ThemeProvider theme={theme}>
-        <QueryClientProvider client={queryClient}>
-          <ToastProvider>
-            <AuthProvider>
-              <CartProvider>
-                <RootNavigator />
-                <AuthenticatedNotificationLayer />
-              </CartProvider>
-            </AuthProvider>
-          </ToastProvider>
-        </QueryClientProvider>
-      </ThemeProvider>
-    </SafeAreaProvider>
+    <StripeAppProvider>
+      <SafeAreaProvider>
+        <ThemeProvider theme={theme}>
+          <QueryClientProvider client={queryClient}>
+            <ToastProvider>
+              <AuthProvider>
+                <CartProvider>
+                  <RootNavigator />
+                  <AuthenticatedNotificationLayer />
+                </CartProvider>
+              </AuthProvider>
+            </ToastProvider>
+          </QueryClientProvider>
+        </ThemeProvider>
+      </SafeAreaProvider>
+    </StripeAppProvider>
   );
 }
 

@@ -6,6 +6,7 @@ import MyPackagesScreen from '../screens/portal/MyPackagesScreen';
 import TrackDeliveryScreen from '../screens/portal/TrackDeliveryScreen';
 import CustomerProfileScreen from '../screens/portal/CustomerProfileScreen';
 import RestaurantsStack from './RestaurantsStack';
+import { portalTabIcons } from './portalTabIcons';
 import type { PortalTabParamList } from './types';
 
 const Tab = createBottomTabNavigator<PortalTabParamList>();
@@ -41,35 +42,70 @@ const PortalNavigator = () => {
         headerShadowVisible: false,
         headerStyle: { backgroundColor: theme.colors.white },
         headerTitleStyle: { fontWeight: '600', fontSize: 16 },
-        headerRight: () => <LogoutButton />,
+        headerRight: LogoutButton,
         tabBarActiveTintColor: theme.colors.link,
-        tabBarInactiveTintColor: theme.colors.placeholder,
+        tabBarInactiveTintColor: theme.colors.textMuted,
+        tabBarHideOnKeyboard: true,
+        tabBarStyle: {
+          minHeight: 62,
+          paddingTop: 6,
+          paddingBottom: 6,
+          borderTopColor: theme.colors.border,
+          backgroundColor: theme.colors.white,
+        },
+        tabBarLabelStyle: {
+          fontSize: 11,
+          fontWeight: '600',
+        },
+        tabBarIconStyle: {
+          marginBottom: 1,
+        },
       }}
     >
       <Tab.Screen
         name="Dashboard"
         component={CustomerDashboardScreen}
-        options={{ title: 'Dashboard', tabBarLabel: 'Home' }}
+        options={{
+          title: 'Dashboard',
+          tabBarLabel: 'Home',
+          tabBarIcon: portalTabIcons.Dashboard,
+        }}
       />
       <Tab.Screen
         name="Restaurants"
         component={RestaurantsStack}
-        options={{ title: 'Restaurants', tabBarLabel: 'Restaurants', headerShown: false }}
+        options={{
+          title: 'Restaurants',
+          tabBarLabel: 'Restaurants',
+          headerShown: false,
+          tabBarIcon: portalTabIcons.Restaurants,
+        }}
       />
       <Tab.Screen
         name="MyOrders"
         component={MyPackagesScreen}
-        options={{ title: 'My orders', tabBarLabel: 'Orders' }}
+        options={{
+          title: 'My orders',
+          tabBarLabel: 'Orders',
+          tabBarIcon: portalTabIcons.MyOrders,
+        }}
       />
       <Tab.Screen
         name="Track"
         component={TrackDeliveryScreen}
-        options={{ title: 'Track delivery', tabBarLabel: 'Track' }}
+        options={{
+          title: 'Track delivery',
+          tabBarLabel: 'Track',
+          tabBarIcon: portalTabIcons.Track,
+        }}
       />
       <Tab.Screen
         name="Profile"
         component={CustomerProfileScreen}
-        options={{ title: 'Profile' }}
+        options={{
+          title: 'Profile',
+          tabBarIcon: portalTabIcons.Profile,
+        }}
       />
     </Tab.Navigator>
   );

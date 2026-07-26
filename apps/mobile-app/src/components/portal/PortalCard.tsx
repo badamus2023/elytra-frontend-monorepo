@@ -18,6 +18,7 @@ const Card = styled.View`
 
 const Header = styled.View`
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: ${({ theme }) => theme.spacing.md}px;
@@ -26,6 +27,7 @@ const Header = styled.View`
 
 const HeaderText = styled.View`
   flex: 1;
+  min-width: 180px;
 `;
 
 const Title = styled.Text`

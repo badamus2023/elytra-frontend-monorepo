@@ -22,6 +22,7 @@ const FILTERS: OrderFilter[] = ['all', 'active', 'done'];
 
 const Row = styled.View`
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: flex-start;
   justify-content: space-between;
   gap: 12px;
@@ -32,9 +33,13 @@ const Row = styled.View`
 
 const RowMain = styled.View`
   flex: 1;
+  min-width: 150px;
 `;
 
 const RowEnd = styled.View`
+  flex-direction: row;
+  flex-wrap: wrap;
+  justify-content: flex-end;
   align-items: flex-end;
   gap: 8px;
 `;
@@ -61,7 +66,7 @@ const Total = styled.Text`
 const MyPackagesScreen = () => {
   const navigation = useNavigation<Nav>();
   const ordersQuery = useOrders();
-  const orders = ordersQuery.data ?? [];
+  const orders = useMemo(() => ordersQuery.data ?? [], [ordersQuery.data]);
   const [filter, setFilter] = useState<OrderFilter>('all');
   const [search, setSearch] = useState('');
 

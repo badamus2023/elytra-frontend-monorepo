@@ -49,11 +49,13 @@ const LineRow = styled.View`
 
 const LineName = styled.Text`
   flex: 1;
+  min-width: 0;
   font-size: 14px;
   color: ${({ theme }) => theme.colors.text};
 `;
 
 const LineMeta = styled.Text`
+  flex-shrink: 0;
   font-size: 14px;
   font-weight: 600;
   color: ${({ theme }) => theme.colors.text};
@@ -111,7 +113,12 @@ const CheckoutScreen = () => {
     return (
       <PortalScreen>
         <PortalCard title="Cart is empty">
-          <GradientButton title="Back to menu" onPress={() => navigation.goBack()} />
+          <GradientButton
+            title="Back to menu"
+            size="compact"
+            fullWidth={false}
+            onPress={() => navigation.goBack()}
+          />
         </PortalCard>
       </PortalScreen>
     );

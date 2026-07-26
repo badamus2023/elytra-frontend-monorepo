@@ -1,4 +1,6 @@
 import { useMemo } from 'react';
+import { useWindowDimensions } from 'react-native';
+import { PackageCheck, Plane, Store } from 'lucide-react-native';
 import { useNavigation } from '@react-navigation/native';
 import type { BottomTabNavigationProp } from '@react-navigation/bottom-tabs';
 import styled from 'styled-components/native';
@@ -49,7 +51,9 @@ const HeroBody = styled.Text`
 const HeroActions = styled.View`
   margin-top: 16px;
   flex-direction: row;
-  gap: 20px;
+  flex-wrap: wrap;
+  column-gap: 20px;
+  row-gap: 4px;
 `;
 
 const KpiGrid = styled.View`
@@ -58,9 +62,10 @@ const KpiGrid = styled.View`
   gap: 12px;
 `;
 
-const KpiHalf = styled.View`
-  width: 48%;
+const KpiHalf = styled.View<{ $singleColumn: boolean }>`
+  flex-basis: ${({ $singleColumn }) => ($singleColumn ? '100%' : '47%')};
   flex-grow: 1;
+  min-width: 0;
 `;
 
 const LinkInline = styled.Text`
@@ -70,6 +75,7 @@ const LinkInline = styled.Text`
 
 const OrderRow = styled.View`
   flex-direction: row;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
@@ -80,6 +86,7 @@ const OrderRow = styled.View`
 
 const OrderMain = styled.View`
   flex: 1;
+  min-width: 180px;
 `;
 
 const OrderTitle = styled.Text`
@@ -117,10 +124,12 @@ const HelpMeta = styled.Text`
 
 const CustomerDashboardScreen = () => {
   const navigation = useNavigation<Nav>();
+  const { width } = useWindowDimensions();
+  const singleColumnKpis = width < 360;
   const { displayName } = useAuth();
   const ordersQuery = useOrders();
   const restaurantsQuery = useRestaurants();
-  const orders = ordersQuery.data ?? [];
+  const orders = useMemo(() => ordersQuery.data ?? [], [ordersQuery.data]);
   const restaurants = restaurantsQuery.data ?? [];
 
   const inTransit = useMemo(
@@ -143,43 +152,51 @@ const CustomerDashboardScreen = () => {
         <HeroActions>
           <TextLink
             title="Browse restaurants →"
+            variant="inverse"
             onPress={() => navigation.navigate('Restaurants')}
           />
           <TextLink
             title="Track order"
+            variant="inverse"
             onPress={() => navigation.navigate('Track')}
           />
         </HeroActions>
       </Hero>
 
       <KpiGrid>
-        <KpiHalf>
-          <PortalKpi label="Total orders" value={orders.length} hint="All time" icon="📦" tone="sky" />
+        <KpiHalf $singleColumn={singleColumnKpis}>
+          <PortalKpi
+            label="Total orders"
+            value={orders.length}
+            hint="All time"
+            icon={<PackageCheck color="#ffffff" size={20} />}
+            tone="sky"
+          />
         </KpiHalf>
-        <KpiHalf>
+        <KpiHalf $singleColumn={singleColumnKpis}>
           <PortalKpi
             label="In the air"
             value={inTransit}
             hint="Dispatched or flying"
-            icon="✈️"
+            icon={<Plane color="#ffffff" size={20} />}
             tone="violet"
           />
         </KpiHalf>
-        <KpiHalf>
+        <KpiHalf $singleColumn={singleColumnKpis}>
           <PortalKpi
             label="Delivered"
             value={delivered}
             hint="Completed"
-            icon="🚚"
+            icon={<PackageCheck color="#ffffff" size={20} />}
             tone="emerald"
           />
         </KpiHalf>
-        <KpiHalf>
+        <KpiHalf $singleColumn={singleColumnKpis}>
           <PortalKpi
             label="Restaurants"
             value={restaurants.length}
-            hint="Available to order from"
-            icon="🍽️"
+            hint="Available now"
+            icon={<Store color="#ffffff" size={20} />}
             tone="amber"
           />
         </KpiHalf>

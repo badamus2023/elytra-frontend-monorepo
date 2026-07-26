@@ -9,7 +9,7 @@
     "android": "react-native run-android",
     "android:dev": "ENVFILE=.env.development react-native run-android",
     "ios:dev": "ENVFILE=.env.development react-native run-ios",
-    "lint": "eslint .",
+    "lint": "eslint --resolve-plugins-relative-to node_modules/@react-native/eslint-config .",
     "orval": "orval --config orval.config.ts",
     "start": "react-native start",
     "test": "jest"
@@ -21,8 +21,10 @@
     "@react-navigation/bottom-tabs": "^7.16.1",
     "@react-navigation/native": "^7.2.4",
     "@react-navigation/native-stack": "^7.15.1",
+    "@stripe/stripe-react-native": "^0.71.0",
     "@tanstack/react-query": "^5.100.10",
     "axios": "^1.16.1",
+    "lucide-react-native": "^1.27.0",
     "react": "19.2.3",
     "react-hook-form": "^7.76.0",
     "react-native": "0.84.1",
@@ -30,6 +32,8 @@
     "react-native-maps": "^1.27.2",
     "react-native-safe-area-context": "^5.7.0",
     "react-native-screens": "^4.25.0",
+    "react-native-svg": "^15.15.5",
+    "react-native-url-polyfill": "^4.0.0",
     "styled-components": "^6.4.1"
   },
   "devDependencies": {
